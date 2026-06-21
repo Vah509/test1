@@ -836,6 +836,9 @@ h3 { font-size: 15px; }
     gap: 7px;
   }
   .em-header-phone .em-phone-icon { fill: var(--c-accent); width: 16px; height: 16px; }
+  .em-header-phone:hover { background: none; }
+  .em-header-phone:hover .em-header-phone-number,
+  .em-header-phone:hover .em-phone-icon { fill: var(--c-accent-hover); color: var(--c-accent-hover); }
   .em-header-phone-number {
     display: inline;
     font-family: var(--ff-body);
