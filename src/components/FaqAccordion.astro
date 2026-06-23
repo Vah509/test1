@@ -1,0 +1,24 @@
+---
+// items — масив { q: string, a: string }
+// sectionTitle — заголовок H2
+const { items = [], sectionTitle = 'Часті запитання' } = Astro.props;
+---
+<section class="em-section">
+  <span class="em-section-label">Часті запитання</span>
+  <h2>{sectionTitle}</h2>
+  <div class="em-faq-list">
+    {items.map((item: { q: string; a: string }, i: number) => (
+      <div class="em-faq-item">
+        <button type="button" class="em-faq-question" aria-expanded="false"
+          aria-controls={`faq-answer-${i}`} id={`faq-question-${i}`}>
+          {item.q}
+          <svg class="em-faq-icon" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="em-faq-answer" id={`faq-answer-${i}`}
+          role="region" aria-labelledby={`faq-question-${i}`}>
+          <p>{item.a}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

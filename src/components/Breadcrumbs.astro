@@ -1,0 +1,23 @@
+---
+// current — назва поточної сторінки (відображається останнім пунктом)
+// parentLabel / parentHref — батьківський пункт (необов'язково)
+const { current, parentLabel = 'Продукція', parentHref = '/posluhy-ta-produktsiia/' } = Astro.props;
+---
+<nav aria-label="Хлібні крихти" class="em-breadcrumbs-wrap">
+  <ol class="em-breadcrumbs" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/" itemprop="item"><span itemprop="name">Головна</span></a>
+      <meta itemprop="position" content="1" />
+    </li>
+    <span class="em-breadcrumbs-sep" aria-hidden="true">›</span>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href={parentHref} itemprop="item"><span itemprop="name">{parentLabel}</span></a>
+      <meta itemprop="position" content="2" />
+    </li>
+    <span class="em-breadcrumbs-sep" aria-hidden="true">›</span>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span itemprop="name">{current}</span>
+      <meta itemprop="position" content="3" />
+    </li>
+  </ol>
+</nav>

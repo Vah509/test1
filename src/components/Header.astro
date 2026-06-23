@@ -1,0 +1,89 @@
+---
+// Пропс activePage — slug активного пункту меню для підсвітки
+// Значення: 'produktsiia' | 'posluhy' | 'vykonani-roboty' | 'pro-nas' | 'kontakty' | ''
+const { activePage = '' } = Astro.props;
+---
+<header class="em-site-header">
+  <div class="em-header-inner">
+    <a href="/" class="em-logo">
+      <span class="em-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      </span>
+      <span class="em-logo-text">
+        <span class="em-logo-name">Електромонтаж</span>
+        <span class="em-logo-sub">Виготовлення електрощитів</span>
+      </span>
+    </a>
+
+    <nav aria-label="Головна навігація">
+      <ul class="em-site-nav">
+        <li class="em-dropdown">
+          <a href="/posluhy-ta-produktsiia/" class={activePage === 'produktsiia' ? 'active' : ''} tabindex="0">
+            Продукція
+            <svg class="em-nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </a>
+          <ul class="em-dropdown-panel">
+            <li><a href="/posluhy-ta-produktsiia/hrshch">ГРЩ / ВРЩ — силові щити</a></li>
+            <li><a href="/posluhy-ta-produktsiia/dymovydalennia">Щит димовидалення</a></li>
+            <li><a href="/posluhy-ta-produktsiia/dvyhuny">Керування двигунами</a></li>
+            <li><a href="/posluhy-ta-produktsiia/shuz">Керування засувками (ШУЗ)</a></li>
+            <li><a href="/posluhy-ta-produktsiia/krm">КРМ</a></li>
+            <li><a href="/posluhy-ta-produktsiia/zenitni-lihtari">Зенітні ліхтарі</a></li>
+            <li><a href="/posluhy-ta-produktsiia/ahro">Для агрогосподарств</a></li>
+          </ul>
+        </li>
+        <li class="em-dropdown">
+          <a href="/posluhy-ta-produktsiia/" class={activePage === 'posluhy' ? 'active' : ''} tabindex="0">
+            Послуги
+            <svg class="em-nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </a>
+          <ul class="em-dropdown-panel">
+            <li><a href="/posluhy-ta-produktsiia/plk">Програмування ПЛК</a></li>
+            <li><a href="/posluhy-ta-produktsiia/elektromontazh">Електромонтажні роботи</a></li>
+          </ul>
+        </li>
+        <li><a href="/vykonani-roboty/" class={activePage === 'vykonani-roboty' ? 'active' : ''}>Виконані роботи</a></li>
+        <li><a href="/pro-nas/" class={activePage === 'pro-nas' ? 'active' : ''}>Про нас</a></li>
+        <li><a href="/kontakty/" class={activePage === 'kontakty' ? 'active' : ''}>Контакти</a></li>
+      </ul>
+    </nav>
+
+    <div class="em-header-right">
+      <a href="tel:+380675097094" class="em-header-phone" aria-label="Зателефонувати +38 (067) 509-70-94">
+        <svg class="em-phone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z"/></svg>
+        <span class="em-header-phone-number">+38 (067) 509-70-94</span>
+      </a>
+      <a href="#kontakty-blok" class="em-header-cta">Залишити заявку</a>
+      <button type="button" class="em-burger" aria-label="Відкрити меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="em-mobile-nav" aria-label="Мобільна навігація">
+    <button type="button" class="em-mobile-toggle active" aria-expanded="false" aria-controls="mobile-sub-produktsiia">
+      Продукція
+      <svg class="em-mobile-toggle-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="em-mobile-sub" id="mobile-sub-produktsiia">
+      <a href="/posluhy-ta-produktsiia/hrshch">— ГРЩ / ВРЩ</a>
+      <a href="/posluhy-ta-produktsiia/dymovydalennia">— Димовидалення</a>
+      <a href="/posluhy-ta-produktsiia/dvyhuny">— Керування двигунами</a>
+      <a href="/posluhy-ta-produktsiia/shuz">— ШУЗ</a>
+      <a href="/posluhy-ta-produktsiia/krm">— КРМ</a>
+      <a href="/posluhy-ta-produktsiia/zenitni-lihtari">— Зенітні ліхтарі</a>
+      <a href="/posluhy-ta-produktsiia/ahro">— Для агрогосподарств</a>
+    </div>
+    <button type="button" class="em-mobile-toggle" aria-expanded="false" aria-controls="mobile-sub-posluhy">
+      Послуги
+      <svg class="em-mobile-toggle-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="em-mobile-sub" id="mobile-sub-posluhy">
+      <a href="/posluhy-ta-produktsiia/plk">— Програмування ПЛК</a>
+      <a href="/posluhy-ta-produktsiia/elektromontazh">— Електромонтажні роботи</a>
+    </div>
+    <a href="/vykonani-roboty/">Виконані роботи</a>
+    <a href="/pro-nas/">Про нас</a>
+    <a href="/kontakty/">Контакти</a>
+  </nav>
+</header>

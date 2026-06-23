@@ -1,0 +1,29 @@
+---
+// currentSlug — slug поточної сторінки, щоб не показувати себе
+// Наприклад: 'hrshch', 'dymovydalennia', 'dvyhuny' тощо
+const { currentSlug = '' } = Astro.props;
+
+const allProducts = [
+  { slug: 'hrshch',            href: '/posluhy-ta-produktsiia/hrshch',            title: 'ГРЩ / ВРЩ — силові щити',            desc: 'Головні та вводно-розподільчі щити до 630А' },
+  { slug: 'dymovydalennia',    href: '/posluhy-ta-produktsiia/dymovydalennia',    title: 'Щити димовидалення',                  desc: 'Димовидалення, підпір повітря, протипожежні клапани' },
+  { slug: 'dvyhuny',           href: '/posluhy-ta-produktsiia/dvyhuny',           title: 'Щити керування двигунами',            desc: 'Прямий пуск, реверс, зірка-трикутник, ЧП, м\'який пуск' },
+  { slug: 'shuz',              href: '/posluhy-ta-produktsiia/shuz',              title: 'Щити керування засувками (ШУЗ)',       desc: 'Трубопровідні системи, електроприводна арматура' },
+  { slug: 'krm',               href: '/posluhy-ta-produktsiia/krm',               title: 'КРМ — конденсаторні установки',       desc: 'Компенсація реактивної потужності на виробництві' },
+  { slug: 'zenitni-lihtari',   href: '/posluhy-ta-produktsiia/zenitni-lihtari',   title: 'Щити керування зенітними ліхтарями', desc: 'Фрамуги, люки, протипожежна автоматика' },
+  { slug: 'ahro',              href: '/posluhy-ta-produktsiia/ahro',              title: 'Електрощити для агрогосподарств',     desc: 'Зернові комплекси, насоси, вентиляція, сушарки' },
+  { slug: 'plk',               href: '/posluhy-ta-produktsiia/plk',               title: 'Програмування ПЛК',                  desc: 'Розробка та налагодження програм для контролерів' },
+];
+
+const products = allProducts.filter(p => p.slug !== currentSlug);
+---
+<section class="em-section">
+  <span class="em-section-label">Інша продукція та послуги</span>
+  <h2>Також виготовляємо</h2>
+  <div class="em-products-grid">
+    {products.map(p => (
+      <a href={p.href} class="em-product-card">
+        <div class="em-product-card-body"><h3>{p.title}</h3><p>{p.desc}</p></div>
+      </a>
+    ))}
+  </div>
+</section>
