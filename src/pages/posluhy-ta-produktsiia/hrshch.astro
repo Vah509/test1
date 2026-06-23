@@ -153,14 +153,23 @@ const otherProducts = [
       </div>
       <p class="em-hero-product-contact">Або зателефонуйте: <a href="tel:+380675097094">+38 (067) 509-70-94</a></p>
     </div>
-    <div class="em-hero-product-photo">
-      <img
-        src="/images/hrshch/hrshch-avr-250a-zovnishnii-vyhlyad-kyiv-2026-06-01.jpg"
-        alt="Головний розподільний щит ГРЩ з АВР 250А — зовнішній вигляд, двосекційний корпус, Київ"
-        width="1044" height="1800"
-        loading="eager"
-      />
-      <div class="em-hero-photo-badge">ГРЩ з АВР · 250А · ETI · 2 секції</div>
+    <div class="em-hero-collage">
+      <div class="em-hero-collage-item">
+        <img src="/images/hrshch/hrshch-vrshch-odynochnyy-shkaf-vvid-kyiv-2026-06-c1.jpg"
+             alt="ГРЩ відкритий — вводний автомат та лічильник NIK" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/hrshch/vrshch-bahato-sektsiynyi-rozpodil-kyiv-2026-06-c2.jpg"
+             alt="ВРЩ багатосекційний — розподіл навантаження, маркування" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/hrshch/vrshch-povnyi-vyhlyad-sektsii-kyiv-2026-06-c3.jpg"
+             alt="ВРЩ повний вигляд — секційний розподіл, ETI" loading="lazy" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/hrshch/hrshch-avr-chint-avtomaty-detal-kyiv-2026-06-c4.jpg"
+             alt="ГРЩ з АВР CHINT — автомати, акуратна кабельна розводка" loading="lazy" />
+      </div>
     </div>
   </div>
 </div>
@@ -430,7 +439,9 @@ const otherProducts = [
 
 <!-- ===== ЛАЙТБОКС ФОТО (відкриває повний розмір для .em-gallery-item з data-full) ===== -->
 <div class="em-lightbox" role="dialog" aria-modal="true" aria-label="Перегляд фото">
-  <button type="button" class="em-lightbox-close" aria-label="Закрити">×</button>
+  <button type="button" class="em-lightbox-close" aria-label="Закрити">&#x2715;</button>
+  <button type="button" class="em-lightbox-prev" aria-label="Попереднє фото">&#8592;</button>
+  <button type="button" class="em-lightbox-next" aria-label="Наступне фото">&#8594;</button>
   <img class="em-lightbox-img" src="" alt="" />
   <p class="em-lightbox-caption"></p>
 </div>

@@ -40,47 +40,80 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* ===== Лайтбокс галереї фото =====
-     Активується тільки для .em-gallery-item, у яких заповнений
-     атрибут data-full (посилання на повнорозмірне фото).
-     Поки фото-заглушки — data-full порожній, клік нічого не робить.
-     Коли додасте реальні фото: просто пропишіть data-full="/шлях/до/фото.jpg"
-     на потрібному .em-gallery-item — більше нічого міняти не треба. */
+  /* ===== Лайтбокс з листанням (←/→, свайп, нескінченний цикл) ===== */
   const lightbox = document.querySelector('.em-lightbox');
   const lightboxImg = document.querySelector('.em-lightbox-img');
   const lightboxCaption = document.querySelector('.em-lightbox-caption');
   const lightboxClose = document.querySelector('.em-lightbox-close');
+  const lightboxPrev = document.querySelector('.em-lightbox-prev');
+  const lightboxNext = document.querySelector('.em-lightbox-next');
 
-  function emOpenLightbox(src, caption) {
-    if (!lightbox || !lightboxImg) return;
-    lightboxImg.src = src;
-    lightboxImg.alt = caption || '';
-    if (lightboxCaption) lightboxCaption.textContent = caption || '';
+  let lbItems = []; // масив {src, caption}
+  let lbIndex = 0;
+
+  function emBuildItems() {
+    lbItems = [];
+    document.querySelectorAll('.em-gallery-item').forEach(item => {
+      const full = item.getAttribute('data-full');
+      if (full) lbItems.push({ src: full, caption: item.getAttribute('data-caption') || '' });
+    });
+  }
+
+  function emShowSlide(idx) {
+    if (!lightboxImg || lbItems.length === 0) return;
+    lbIndex = ((idx % lbItems.length) + lbItems.length) % lbItems.length; // нескінченний цикл
+    lightboxImg.src = lbItems[lbIndex].src;
+    lightboxImg.alt = lbItems[lbIndex].caption;
+    if (lightboxCaption) lightboxCaption.textContent = lbItems[lbIndex].caption;
+  }
+
+  function emOpenLightbox(startIdx) {
+    if (!lightbox) return;
+    emBuildItems();
+    emShowSlide(startIdx);
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
+
   function emCloseLightbox() {
     if (!lightbox) return;
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
   }
 
-  document.querySelectorAll('.em-gallery-item').forEach(item => {
+  // Клік по картці галереї
+  document.querySelectorAll('.em-gallery-item').forEach((item, i) => {
     const full = item.getAttribute('data-full');
-    if (!full) return; // фото ще не додано — пропускаємо, клік не активний
-    item.addEventListener('click', () => {
-      emOpenLightbox(full, item.getAttribute('data-caption') || '');
-    });
+    if (!full) return;
+    item.addEventListener('click', () => emOpenLightbox(i));
   });
 
   if (lightboxClose) lightboxClose.addEventListener('click', emCloseLightbox);
+  if (lightboxPrev) lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); emShowSlide(lbIndex - 1); });
+  if (lightboxNext) lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); emShowSlide(lbIndex + 1); });
+
   if (lightbox) {
     lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) emCloseLightbox();
+      if (e.target === lightbox || e.target === lightboxImg) emCloseLightbox();
     });
   }
+
+  // Клавіатура
   document.addEventListener('keydown', (e) => {
+    if (!lightbox || !lightbox.classList.contains('active')) return;
     if (e.key === 'Escape') emCloseLightbox();
+    if (e.key === 'ArrowLeft') emShowSlide(lbIndex - 1);
+    if (e.key === 'ArrowRight') emShowSlide(lbIndex + 1);
   });
+
+  // Свайп на мобільному
+  let tsX = 0;
+  if (lightbox) {
+    lightbox.addEventListener('touchstart', (e) => { tsX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - tsX;
+      if (Math.abs(dx) > 50) emShowSlide(lbIndex + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+  }
 
 });

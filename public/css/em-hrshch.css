@@ -59,50 +59,42 @@
 }
 .em-hero-product-contact a:hover { color: var(--c-accent); }
 
-/* Фото у hero */
-.em-hero-product-photo {
+/* Коллаж 2×2 у hero */
+.em-hero-collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  max-height: 480px;
+}
+.em-hero-collage-item {
+  overflow: hidden;
   position: relative;
-  border-radius: var(--radius);
-  overflow: visible;
 }
-.em-hero-product-photo img {
+.em-hero-collage-item img {
   width: 100%;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
+  height: 100%;
+  object-fit: cover;
   display: block;
+  transition: transform 0.35s ease;
 }
-.em-hero-photo-placeholder {
-  background: var(--c-panel);
-  border: 2px dashed var(--c-accent-border);
-  border-radius: var(--radius);
-  aspect-ratio: 4/3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--c-muted);
-  font-family: var(--ff-body);
-  font-size: 14px;
-  text-align: center;
+.em-hero-collage-item:hover img {
+  transform: scale(1.05);
 }
-.em-hero-photo-placeholder svg {
-  width: 48px; height: 48px;
-  fill: var(--c-accent);
-  opacity: 0.2;
+@media (max-width: 900px) {
+  .em-hero-collage {
+    max-height: 340px;
+    aspect-ratio: 4 / 3;
+  }
 }
-.em-hero-photo-badge {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  background: var(--c-accent);
-  color: #fff;
-  font-family: var(--ff-body);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: var(--radius-xs);
-  letter-spacing: 0.02em;
+@media (max-width: 600px) {
+  .em-hero-collage {
+    max-height: 260px;
+    aspect-ratio: 4 / 3;
+  }
 }
 
 @media (max-width: 600px) {
