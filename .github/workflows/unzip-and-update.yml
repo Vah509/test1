@@ -34,14 +34,11 @@ jobs:
           
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
           if [ -f "$ZIP_FILE" ]; then
-            # 1. Получаем список только JPEG файлов из архива ДО его удаления
-            UNZIP_LIST=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg)$" || true)
-            
-            # 2. Распаковка во временную папку
+            # 1. Создаем чистую временную папку и ЖЕСТКО принудительно распаковываем (-o)
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
             
-            # 3. Удаление файлов по списку delete.txt
+            # 2. Удаление файлов по списку delete.txt
             if [ -f "./temp_unzip/delete.txt" ]; then
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
@@ -52,64 +49,59 @@ jobs:
               rm ./temp_unzip/delete.txt
             fi
             
-            # 4. ПЕРЕМЕЩАЕМ ВСЁ НА СВОИ МЕСТА И ЧИСТИМ АРХИВЫ
-            cp -r ./temp_unzip/* ./
-            rm -rf ./temp_unzip
-            rm "$ZIP_FILE"
-            
-            # 5. ИНСПЕКЦИЯ И СЖАТИЕ НА ЖЕСТКОМ ДИСКЕ ПЕРЕД КОММИТОМ
+            # 3. Готовим отчет
             REPORT_FILE="tg_image_report.txt"
             echo "⏱️ *$CURRENT_TIME*" > $REPORT_FILE
             echo "📸 *Инспекция фото:*" >> $REPORT_FILE
             HAS_IMAGES=false
             
-            if [ -n "$UNZIP_LIST" ]; then
-              echo "$UNZIP_LIST" | while read -r SHORT_PATH; do
-                SHORT_PATH=$(echo "$SHORT_PATH" | tr -d '\r' | xargs)
+            # 4. Сканируем файлы во временной папке
+            while IFS= read -r -d '' FILE; do
+              [ -e "$FILE" ] || continue
+              HAS_IMAGES=true
+              
+              SHORT_PATH=${FILE#./temp_unzip/}
+              
+              ORIG_SIZE_BYTES=$(stat -c%s "$FILE")
+              ORIG_SIZE_KB=$((ORIG_SIZE_BYTES / 1024))
+              WIDTH=$(identify -format "%w" "$FILE" 2>/dev/null || echo "0")
+              
+              if [ $ORIG_SIZE_KB -ge 1024 ]; then
+                ORIG_SIZE_STR="$(awk "BEGIN {printf \"%.1f\", $ORIG_SIZE_KB/1024}") MB"
+              else
+                ORIG_SIZE_STR="${ORIG_SIZE_KB} KB"
+              fi
+              
+              if [ "$WIDTH" -le 1200 ] && [ "$WIDTH" -gt 0 ]; then
+                echo "• \`$SHORT_PATH\` — ok" >> $REPORT_FILE
+              elif [ "$WIDTH" -gt 1200 ]; then
+                TMP_FILE=$(mktemp)
+                convert "$FILE" -resize "1200>" -quality 85 "$TMP_FILE"
+                mv "$TMP_FILE" "$FILE"
                 
-                if [ -z "$SHORT_PATH" ] || [ ! -f "$SHORT_PATH" ]; then
-                  continue
-                fi
+                NEW_SIZE_BYTES=$(stat -c%s "$FILE")
+                NEW_SIZE_KB=$((NEW_SIZE_BYTES / 1024))
                 
-                HAS_IMAGES=true
-                
-                ORIG_SIZE_BYTES=$(stat -c%s "$SHORT_PATH")
-                ORIG_SIZE_KB=$((ORIG_SIZE_BYTES / 1024))
-                WIDTH=$(identify -format "%w" "$SHORT_PATH" 2>/dev/null || echo "0")
-                
-                if [ $ORIG_SIZE_KB -ge 1024 ]; then
-                  ORIG_SIZE_STR="$(awk "BEGIN {printf \"%.1f\", $ORIG_SIZE_KB/1024}") MB"
+                if [ $NEW_SIZE_KB -ge 1024 ]; then
+                  NEW_SIZE_STR="$(awk "BEGIN {printf \"%.1f\", $NEW_SIZE_KB/1024}") MB"
                 else
-                  ORIG_SIZE_STR="${ORIG_SIZE_KB} KB"
+                  NEW_SIZE_STR="${NEW_SIZE_KB} KB"
                 fi
                 
-                if [ "$WIDTH" -le 1200 ] && [ "$WIDTH" -gt 0 ]; then
-                  echo "• \`$SHORT_PATH\` — ok" >> $REPORT_FILE
-                elif [ "$WIDTH" -gt 1200 ]; then
-                  # Перехватываем тяжелый файл, жмем до 1200px и качества 85 прямо на диске
-                  TMP_FILE=$(mktemp)
-                  convert "$SHORT_PATH" -resize "1200>" -quality 85 "$TMP_FILE"
-                  mv "$TMP_FILE" "$SHORT_PATH"
-                  
-                  NEW_SIZE_BYTES=$(stat -c%s "$SHORT_PATH")
-                  NEW_SIZE_KB=$((NEW_SIZE_BYTES / 1024))
-                  
-                  if [ $NEW_SIZE_KB -ge 1024 ]; then
-                    NEW_SIZE_STR="$(awk "BEGIN {printf \"%.1f\", $NEW_SIZE_KB/1024}") MB"
-                  else
-                    NEW_SIZE_STR="${NEW_SIZE_KB} KB"
-                  fi
-                  
-                  echo "• \`$SHORT_PATH\` — $ORIG_SIZE_STR — $NEW_SIZE_STR — опт." >> $REPORT_FILE
-                else
-                  echo "• \`$SHORT_PATH\` — ошибка чтения файла" >> $REPORT_FILE
-                fi
-              done
-            fi
+                echo "• \`$SHORT_PATH\` — $ORIG_SIZE_STR — $NEW_SIZE_STR — опт." >> $REPORT_FILE
+              else
+                echo "• \`$SHORT_PATH\` — ошибка чтения файла" >> $REPORT_FILE
+              fi
+            done < <(find ./temp_unzip -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) -print0)
             
             if [ "$HAS_IMAGES" = false ]; then
               echo "Новых изображений в архиве нет." >> $REPORT_FILE
             fi
+            
+            # 5. Переносим файлы в корень, затирая старые файлы без вопросов
+            cp -rf ./temp_unzip/* ./
+            rm -rf ./temp_unzip
+            rm "$ZIP_FILE"
             
             {
               echo 'IMAGE_REPORT<<EOF'
