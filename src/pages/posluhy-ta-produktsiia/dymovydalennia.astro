@@ -1,0 +1,346 @@
+---
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
+import AlsoMake from '../../components/AlsoMake.astro';
+import ContactBlock from '../../components/ContactBlock.astro';
+import Lightbox from '../../components/Lightbox.astro';
+
+const title = "Щит димовидалення на замовлення — Київ та область | elektromontazh.kiev.ua";
+const description = "Виготовляємо щити димовидалення, підпору повітря та керування протипожежними клапанами. Робота за схемами проєктної організації або розробка з нуля. Гарантія 12 міс. Київ та вся Україна.";
+
+const faqItems = [
+  {
+    q: "Що робити, якщо готової схеми немає?",
+    a: "Надішліть опис задачі — які споживачі, яке навантаження, які режими роботи. Розробимо принципову схему самостійно та узгодимо з вами перед початком виготовлення."
+  },
+  {
+    q: "Чи можна надати свої компоненти для збірки?",
+    a: "Ні. Ми самостійно закуповуємо все обладнання відповідно до узгодженої специфікації і передаємо замовнику готовий виріб з гарантією. Це дозволяє нам відповідати за якість щита від початку до кінця."
+  },
+  {
+    q: "Яку документацію ви передаєте разом зі щитом?",
+    a: "Паспорт виробу та принципову схему. Документи вкладаються безпосередньо у щит."
+  },
+  {
+    q: "Чи потрібен ПЛК, чи достатньо релейної схеми?",
+    a: "Залежить від задачі. Якщо зон і сигналів небагато — реалізуємо на релейній схемі: надійно і дешевше. Якщо логіка складна або зон багато — інтегруємо ПЛК. Завжди вибираємо рішення виходячи з доцільності."
+  },
+  {
+    q: "Чи інтегрується щит з пожежною сигналізацією будь-якого виробника?",
+    a: "Так. Працюємо від сигналу будь-якої АУПС — як правило це нормально-відкритий або нормально-закритий контакт. Якщо проект передбачає інший тип сигналу — адаптуємо рішення до вимог проекту."
+  },
+  {
+    q: "Чи можна керувати кількома зонами незалежно?",
+    a: "Так. Реалізуємо зональне керування будь-якою кількістю груп обладнання. Кожна зона спрацьовує незалежно — автоматично або вручну. Головне, щоб зонування було передбачено в проєктній документації або зазначено в технічному завданні."
+  },
+  {
+    q: "Чому термін виготовлення від 2 тижнів, а не від 1?",
+    a: "Щити димовидалення — складніші вироби, ніж стандартні силові щити. Більше компонентів, детальне тестування логіки керування перед відправкою. Точний термін узгоджується після отримання ТЗ або схеми."
+  }
+];
+---
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href="https://elektromontazh.kiev.ua/posluhy-ta-produktsiia/dymovydalennia" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/em-hrshch.css" />
+</head>
+<body>
+
+<Header activePage="produktsiia" />
+
+<Breadcrumbs current="Щити димовидалення" />
+
+<!-- HERO — зелений -->
+<div class="em-hero-product">
+  <div class="em-hero-product-inner">
+    <div class="em-hero-product-text">
+      <h1>Виготовлення щитів димовидалення на замовлення</h1>
+      <p class="em-hero-product-lead">Виготовляємо щити для систем протидимного захисту будівель: димовидалення, підпір повітря, керування протипожежними клапанами. Робота за схемами проєктної організації або розробка схеми з нуля. Київ, Київська область та вся Україна.</p>
+      <div class="em-hero-badges">
+        <div class="em-badge"><strong>від 1</strong> вентилятора і більше</div>
+        <div class="em-badge"><strong>від 2 тижнів</strong> — виготовлення</div>
+        <div class="em-badge"><strong>12 міс.</strong> — гарантія</div>
+        <div class="em-badge"><strong>25 років</strong> — досвід</div>
+      </div>
+      <div class="em-hero-product-actions">
+        <a href="#kontakty-blok" class="em-btn-primary">Замовити / Зв'язатися з нами</a>
+      </div>
+      <p class="em-hero-product-contact">Або зателефонуйте: <a href="tel:+380675097094">+38 (067) 509-70-94</a></p>
+    </div>
+    <div class="em-hero-collage">
+      <div class="em-hero-collage-item">
+        <img src="/images/dymovydalennia/dymovydalennia-shchmu-3-zony-fasad-kyiv-2026-06-c1.jpg"
+             alt="Щит димовидалення ЩМУ — фасад, 3 зони керування" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/dymovydalennia/dymovydalennia-shchmu-4-zony-fasad-kyiv-2026-06-c2.jpg"
+             alt="Щит керування димовидаленням — 4 зони, ДВ1, КДВ1, ПП1, ПП2" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/dymovydalennia/dymovydalennia-vnutrishniy-montazh-avtomaty-kyiv-2026-06-c3.jpg"
+             alt="Внутрішній монтаж щита димовидалення — автомати ETI, контактори" loading="lazy" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/dymovydalennia/dymovydalennia-shkpp-pidpir-fasad-kyiv-2026-06-c4.jpg"
+             alt="Шафа ШКПП — щит керування вентилятором підпору повітря" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ГАЛЕРЕЯ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Наші роботи</span>
+  <h2>Збірка щитів димовидалення — фото з нашого виробництва</h2>
+  <div class="em-product-gallery">
+    <div class="em-gallery-item em-gallery-item-large"
+         data-caption="Щит ЩМУ ДВ1+КДВ1+ПП1 — фасад, 3 зони керування, автоматичний та ручний режими"
+         data-full="/images/dymovydalennia/dymovydalennia-shchmu-3-zony-zahalnyi-vyhlyad-kyiv-2026-06-01.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-shchmu-3-zony-zahalnyi-vyhlyad-kyiv-2026-06-01.jpg"
+           alt="Щит димовидалення ЩМУ — загальний вигляд, 3 зони" width="1193" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит ЩМУ — 4 зони (ДВ1, КДВ1, ПП1, ПП2), фасад з перемикачами та сигнальними лампами"
+         data-full="/images/dymovydalennia/dymovydalennia-shchmu-4-zony-fasad-kyiv-2026-06-c2.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-shchmu-4-zony-fasad-kyiv-2026-06-c2.jpg"
+           alt="Щит димовидалення — фасад 4 зони" width="600" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Шафа ШМУ — керування одним вентилятором, режим РУЧ–0–АВТ, кнопки пуск/стоп"
+         data-full="/images/dymovydalennia/dymovydalennia-shmu-fasad-odyn-ventylator-kyiv-2026-06-03.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-shmu-fasad-odyn-ventylator-kyiv-2026-06-03.jpg"
+           alt="Шафа ШМУ — один вентилятор, пуск/стоп" width="972" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Внутрішній монтаж — автомати ETI QF1–QF4, контактори KM1–KM3, реле KV, клеми"
+         data-full="/images/dymovydalennia/dymovydalennia-vnutrishniy-montazh-avtomaty-kyiv-2026-06-c3.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-vnutrishniy-montazh-avtomaty-kyiv-2026-06-c3.jpg"
+           alt="Внутрішній монтаж щита — автомати та контактори ETI" width="900" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Контактор ETI KM1, автомати QF1/QF2, реле контролю напруги KV — акуратна укладка кабелів"
+         data-full="/images/dymovydalennia/dymovydalennia-vnutrishniy-kontaktor-eti-rele-kv-kyiv-2026-06-05.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-vnutrishniy-kontaktor-eti-rele-kv-kyiv-2026-06-05.jpg"
+           alt="Контактор ETI та реле KV у щиті димовидалення" width="932" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="4 контактори ETI KM1–KM4 на DIN-рейці — щит керування клапанами димовидалення"
+         data-full="/images/dymovydalennia/dymovydalennia-kontaktory-eti-km1-km4-kyiv-2026-06-02.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-kontaktory-eti-km1-km4-kyiv-2026-06-02.jpg"
+           alt="4 контактори ETI у щиті димовидалення" width="1200" height="600" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Шафа ШКПП — щит підпору повітря, відкритий корпус: монтажна панель та монтаж дверей"
+         data-full="/images/dymovydalennia/dymovydalennia-shkpp-vidkrytyy-montazh-dvertsya-kyiv-2026-06-07.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-shkpp-vidkrytyy-montazh-dvertsya-kyiv-2026-06-07.jpg"
+           alt="Щит ШКПП відкритий — монтаж панелі та дверцят" width="1200" height="900" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Внутрішній монтаж ШКПП — реле K1–K4, контактор KM1, клемні колодки"
+         data-full="/images/dymovydalennia/dymovydalennia-shkpp-vnutrishniy-rele-k1-k4-kyiv-2026-06-08.jpg">
+      <img src="/images/dymovydalennia/dymovydalennia-shkpp-vnutrishniy-rele-k1-k4-kyiv-2026-06-08.jpg"
+           alt="Внутрішній монтаж ШКПП — реле та контактор" width="676" height="1200" loading="lazy" />
+    </div>
+  </div>
+  <div class="em-gallery-cta">
+    <a href="/vykonani-roboty/" class="em-btn-primary">Переглянути роботи →</a>
+  </div>
+</section>
+
+<!-- ДЕ ЗАСТОСОВУЄТЬСЯ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Застосування</span>
+    <h2>Де застосовуються щити димовидалення</h2>
+    <p class="em-lead">Щити димовидалення, підпору повітря та керування протипожежними клапанами — окремий клас обладнання протипожежного розділу проєкту. При пожежі автоматично запускають витяжку, підтримують тиск у сходових клітинах та керують клапанами по зонах.</p>
+    <div class="em-objects-grid">
+      <div class="em-object-card">
+        <div class="em-object-num">01</div>
+        <h3>Складські комплекси та логістичні термінали</h3>
+        <p>Димовидалення через покрівлю або примусова витяжка по зонах при пожежі.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">02</div>
+        <h3>Торгові та торгово-розважальні центри</h3>
+        <p>Зонування систем димовидалення, підпір повітря в сходових клітинах та атріумах.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">03</div>
+        <h3>Виробничі підприємства</h3>
+        <p>Аварійна витяжка диму з виробничих цехів, керування клапанами по секціях.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">04</div>
+        <h3>Офісні та бізнес-центри</h3>
+        <p>Підпір повітря в ліфтових шахтах та тамбур-шлюзах, автоматичне спрацювання від АУПС.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">05</div>
+        <h3>Підрядні організації</h3>
+        <p>Електромонтажні компанії, які ведуть монтаж систем протидимного захисту і потребують щит за схемою замовника.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ЯКІ ЩИТИ ВИГОТОВЛЯЄМО — білий -->
+<section class="em-section">
+  <span class="em-section-label">Продукція</span>
+  <h2>Які щити димовидалення виготовляємо</h2>
+  <p class="em-lead">Виготовляємо щити для обладнання димовидалення — на одну або кілька одиниць, відповідно до проєкту. За необхідності реалізуємо зонування та диспетчеризацію.</p>
+  <div class="em-why-grid">
+    <div class="em-why-card">
+      <div class="em-why-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <h3>Щит димовидалення</h3>
+      <p>Керування витяжними вентиляторами: автоматичний запуск від АУПС, ручне керування по зонах, сигналізація стану.</p>
+    </div>
+    <div class="em-why-card">
+      <div class="em-why-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <h3>Щит підпору повітря</h3>
+      <p>Керування припливними вентиляторами для сходових кліток, тамбур-шлюзів та ліфтових шахт.</p>
+    </div>
+    <div class="em-why-card">
+      <div class="em-why-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 21V9"/>
+        </svg>
+      </div>
+      <h3>Щит керування протипожежними клапанами</h3>
+      <p>Автоматичне відкриття або закриття клапанів за сигналом пожежної сигналізації, з індикацією положення.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ХАРАКТЕРИСТИКИ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Характеристики</span>
+    <h2>Технічні характеристики щита димовидалення</h2>
+    <table class="em-specs-table">
+      <tbody>
+        <tr><td class="em-specs-label">Напруга живлення</td><td class="em-specs-value">380В / 50Гц або 220В — за проєктом</td></tr>
+        <tr><td class="em-specs-label">Кількість вентиляторів</td><td class="em-specs-value">від 1 і більше — за ТЗ</td></tr>
+        <tr><td class="em-specs-label">Кількість клапанів</td><td class="em-specs-value">від 1 і більше — за ТЗ</td></tr>
+        <tr><td class="em-specs-label">Керування</td><td class="em-specs-value">Автоматичне (від АУПС) + ручне</td></tr>
+        <tr><td class="em-specs-label">Зонування</td><td class="em-specs-value">За проєктом або ТЗ замовника</td></tr>
+        <tr><td class="em-specs-label">Диспетчеризація</td><td class="em-specs-value">За вимогою замовника</td></tr>
+        <tr><td class="em-specs-label">Виготовлення за схемами замовника</td><td class="em-specs-value">Так</td></tr>
+        <tr><td class="em-specs-label">Розробка схем під ТЗ</td><td class="em-specs-value">Так</td></tr>
+        <tr><td class="em-specs-label">Гарантія</td><td class="em-specs-value">12 місяців</td></tr>
+        <tr><td class="em-specs-label">Терміни виготовлення</td><td class="em-specs-value">від 2 тижнів</td></tr>
+        <tr><td class="em-specs-label">Доставка</td><td class="em-specs-value">Київ, Київська область, вся Україна</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- КОМПОНЕНТИ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Компоненти</span>
+  <h2>Компоненти та виробники</h2>
+  <p class="em-lead">Підбираємо під бюджет та наявність. Конкретний бренд узгоджується при прийомі замовлення.</p>
+  <div class="em-brands">
+    <div class="em-brands-group">
+      <div class="em-brands-group-label">Основні бренди</div>
+      <div class="em-brands-row">
+        <div class="em-brand-pill">ETI</div>
+        <div class="em-brand-pill">Hager</div>
+        <div class="em-brand-pill">Schneider Electric</div>
+        <div class="em-brand-pill">Eaton</div>
+      </div>
+    </div>
+    <div class="em-brands-group">
+      <div class="em-brands-group-label">Економ-комплектація</div>
+      <div class="em-brands-row">
+        <div class="em-brand-pill secondary">E-Next</div>
+        <div class="em-brand-pill secondary">Asko</div>
+        <div class="em-brand-pill secondary">Chint</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ЯК МИ ПРАЦЮЄМО — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Як ми працюємо</span>
+    <h2>5 кроків від ТЗ до готового щита</h2>
+    <div class="em-steps-row">
+      <div class="em-step">
+        <div class="em-step-num">01</div>
+        <h3>Технічне завдання</h3>
+        <p>Надсилаєте ТЗ, схему або описуєте задачу. Приймаємо PDF, DWG, фото, усний опис.</p>
+      </div>
+      <div class="em-step">
+        <div class="em-step-num">02</div>
+        <h3>Розрахунок та схема</h3>
+        <p>Розробляємо або перевіряємо схему, узгоджуємо вартість та строки. Відповідаємо за 1–2 дні.</p>
+      </div>
+      <div class="em-step">
+        <div class="em-step-num">03</div>
+        <h3>Оплата</h3>
+        <p>Після оплати виріб ставиться у виробництво.</p>
+      </div>
+      <div class="em-step">
+        <div class="em-step-num">04</div>
+        <h3>Збірка та перевірка</h3>
+        <p>Збираємо у Києві. Маркуємо, перевіряємо кожен щит перед відправкою.</p>
+      </div>
+      <div class="em-step">
+        <div class="em-step-num">05</div>
+        <h3>Передача з документацією</h3>
+        <p>Доставка по Києву та Київській обл. або Нова Пошта. Паспорт виробу та схема — у щиті.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ПЕРЕВАГИ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Переваги</span>
+  <h2>Чому замовляють у нас</h2>
+  <div class="em-why-grid">
+    <div class="em-why-card"><h3>Досвід з 1999 року</h3><p>25+ років виготовлення щитів для промислових та комерційних об'єктів.</p></div>
+    <div class="em-why-card"><h3>Робота за проєктною документацією</h3><p>Приймаємо схеми від будь-якої проєктної організації та збираємо точно за ними.</p></div>
+    <div class="em-why-card"><h3>Розробляємо схеми самостійно</h3><p>Якщо немає проєкту — надішліть ТЗ або опис задачі. Ми самі розробимо схему та узгодимо з вами.</p></div>
+    <div class="em-why-card"><h3>Тестування перед відправкою</h3><p>Кожен щит перевіряється до передачі замовнику. Паспорт виробу — з кожним щитом.</p></div>
+    <div class="em-why-card"><h3>Доставка по всій Україні</h3><p>По Києву та Київській обл. — власним транспортом. По Україні — Новою Поштою.</p></div>
+    <div class="em-why-card"><h3>Гарантія 12 місяців</h3><p>На кожен виготовлений щит — письмове гарантійне зобов'язання.</p></div>
+  </div>
+</section>
+
+<!-- FAQ — зелений -->
+<FaqAccordion items={faqItems} sectionTitle="Питання про виготовлення щитів димовидалення" />
+
+<!-- КОНТАКТНИЙ БЛОК — зелений (ContactBlock = em-section-alt) -->
+<ContactBlock title="Готові обговорити ваше замовлення — щит димовидалення" />
+
+<!-- ТАКОЖ ВИГОТОВЛЯЄМО — білий -->
+<AlsoMake currentSlug="dymovydalennia" />
+
+<Footer />
+<Lightbox />
+<script is:inline src="/js/em-site.js"></script>
+</body>
+</html>
