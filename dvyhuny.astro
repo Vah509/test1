@@ -1,0 +1,380 @@
+---
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
+import AlsoMake from '../../components/AlsoMake.astro';
+import ContactBlock from '../../components/ContactBlock.astro';
+import Lightbox from '../../components/Lightbox.astro';
+
+const title = "Виготовлення щитів керування електродвигунами на замовлення | elektromontazh.kiev.ua";
+const description = "Виготовлення щитів керування електродвигунами: прямий пуск, реверс, зірка-трикутник, софтстартер, частотний перетворювач. Гарантія 12 міс. Київ, Київська область та вся Україна.";
+
+const faqItems = [
+  {
+    q: "Що робити, якщо готової схеми немає?",
+    a: "Надішліть опис задачі — які споживачі, яке навантаження, які режими роботи. Розробимо принципову схему самостійно та узгодимо з вами перед початком виготовлення."
+  },
+  {
+    q: "Чи можна надати свої компоненти для збірки?",
+    a: "Ні. Ми самостійно закуповуємо все обладнання відповідно до узгодженої специфікації і передаємо замовнику готовий виріб з гарантією. Це дозволяє нам відповідати за якість щита від початку до кінця."
+  },
+  {
+    q: "Яку документацію ви передаєте разом зі щитом?",
+    a: "Паспорт виробу та принципову схему. Документи вкладаються безпосередньо у щит."
+  },
+  {
+    q: "Чи потрібен ПЛК, чи достатньо релейної схеми?",
+    a: "Залежить від задачі. Якщо сигналів і двигунів небагато — реалізуємо на релейно-контакторній схемі: це надійно і дешевше. Якщо логіка складна, двигунів або сигналів багато — інтегруємо ПЛК і розробляємо програму під задачу. Завжди вибираємо рішення виходячи з доцільності."
+  },
+  {
+    q: "Скільки двигунів можна керувати з одного щита?",
+    a: "Від одного до дванадцяти і більше — залежить від технічного завдання. Збираємо як компактні однодвигунні щити, так і багатосекційні шафи керування групою двигунів."
+  },
+  {
+    q: "Чи можна організувати автоматичний режим без оператора?",
+    a: "Так. Реалізуємо ручний, автоматичний і дистанційний режими керування — на вибір або всі три одночасно з перемикачем режимів."
+  },
+  {
+    q: "Чи можна замовити щит з частотним перетворювачем?",
+    a: "Так. Виготовляємо щити з ЧП під будь-яке навантаження. Тип і потужність частотного перетворювача узгоджується при прийомі замовлення відповідно до параметрів двигуна."
+  },
+];
+---
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href="https://elektromontazh.kiev.ua/posluhy-ta-produktsiia/dvyhuny" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/em-hrshch.css" />
+</head>
+<body>
+
+<!-- ШАПКА -->
+<Header activePage="produktsiia" />
+
+<!-- ХЛІБНІ КРИХТИ -->
+<Breadcrumbs current="Щити керування двигунами" />
+
+<!-- HERO — зелений -->
+<div class="em-hero-product">
+  <div class="em-hero-product-inner">
+    <div class="em-hero-product-text">
+      <h1>Виготовлення щитів керування електродвигунами на замовлення</h1>
+      <p class="em-hero-product-lead">Виготовляємо щити керування електродвигунами будь-якої складності. Прямий пуск, реверс, зірка-трикутник, софтстартер, частотний перетворювач — під ваше технічне завдання. Київ, Київська область та вся Україна.</p>
+      <div class="em-hero-badges">
+        <div class="em-badge"><strong>від 1 до 12+</strong> двигунів</div>
+        <div class="em-badge"><strong>від 1 тижня</strong> — виготовлення</div>
+        <div class="em-badge"><strong>12 міс.</strong> — гарантія</div>
+        <div class="em-badge"><strong>25 років</strong> — досвід</div>
+      </div>
+      <div class="em-hero-product-actions">
+        <a href="#kontakty-blok" class="em-btn-primary">Замовити / Зв'язатися з нами</a>
+      </div>
+      <p class="em-hero-product-contact">Або зателефонуйте: <a href="tel:+380675097094">+38 (067) 509-70-94</a></p>
+    </div>
+    <div class="em-hero-collage">
+      <div class="em-hero-collage-item">
+        <img src="/images/dvyhuny/dvyhuny-shkaf-zahalnyi-vyhlyad-kyiv-2026-06-c1.jpg"
+             alt="Щит керування двигунами — загальний вигляд шафи з відчиненими дверцями" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/dvyhuny/dvyhuny-kontaktory-avtomaty-montazh-kyiv-2026-06-c2.jpg"
+             alt="Блок контакторів та автоматів — акуратний монтаж у щиті керування" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/dvyhuny/dvyhuny-eti-kontaktory-klemny-blok-kyiv-2026-06-c3.jpg"
+             alt="Контактори ETI, теплове реле та клемний блок у щиті двигуна" loading="lazy" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/dvyhuny/dvyhuny-chastotnyy-peretvoriuvach-softstarter-kyiv-2026-06-c4.jpg"
+             alt="Частотний перетворювач та софтстартер Chint у шафі керування" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ГАЛЕРЕЯ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Наші роботи</span>
+  <h2>Виготовлення щитів керування двигунами — фото з нашого виробництва</h2>
+  <div class="em-product-gallery">
+    <div class="em-gallery-item em-gallery-item-large"
+         data-caption="Щит керування двигунами — повний вигляд багатосекційної шафи"
+         data-full="/images/dvyhuny/dvyhuny-shkaf-keruvannia-dvyhunamy-zahalnyi-kyiv-2026-06-01.jpg">
+      <img src="/images/dvyhuny/dvyhuny-shkaf-keruvannia-dvyhunamy-zahalnyi-kyiv-2026-06-01.jpg"
+           alt="Щит керування двигунами — загальний вигляд шафи" width="675" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Блок контакторів та автоматичних вимикачів — внутрішній монтаж щита"
+         data-full="/images/dvyhuny/dvyhuny-blok-kontaktoriv-avtomativ-montazh-kyiv-2026-06-02.jpg">
+      <img src="/images/dvyhuny/dvyhuny-blok-kontaktoriv-avtomativ-montazh-kyiv-2026-06-02.jpg"
+           alt="Блок контакторів і автоматів — монтаж у щиті керування" width="1200" height="675" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Частотний перетворювач та софтстартер Chint — встановлено у шафі"
+         data-full="/images/dvyhuny/dvyhuny-chp-softstarter-chint-vnutrishnii-kyiv-2026-06-03.jpg">
+      <img src="/images/dvyhuny/dvyhuny-chp-softstarter-chint-vnutrishnii-kyiv-2026-06-03.jpg"
+           alt="ЧП та софтстартер Chint у щиті керування двигунами" width="1200" height="675" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Контактори E.NEXT, клемні затискачі — зірка-трикутник"
+         data-full="/images/dvyhuny/dvyhuny-kontaktory-enext-klemni-zatiskachi-kyiv-2026-06-04.jpg">
+      <img src="/images/dvyhuny/dvyhuny-kontaktory-enext-klemni-zatiskachi-kyiv-2026-06-04.jpg"
+           alt="Контактори E.NEXT та клемні затискачі для схеми зірка-трикутник" width="1200" height="900" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Контактори Hager, теплові реле — акуратна розводка"
+         data-full="/images/dvyhuny/dvyhuny-hager-kontaktory-termorelay-montazh-kyiv-2026-06-05.jpg">
+      <img src="/images/dvyhuny/dvyhuny-hager-kontaktory-termorelay-montazh-kyiv-2026-06-05.jpg"
+           alt="Контактори Hager та теплові реле у щиті керування двигунами" width="1200" height="675" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Багатосекційна шафа — кабельні клеми, маркування, шини"
+         data-full="/images/dvyhuny/dvyhuny-bahatosektsiinyi-shchyt-kabelni-klemy-kyiv-2026-06-06.jpg">
+      <img src="/images/dvyhuny/dvyhuny-bahatosektsiinyi-shchyt-kabelni-klemy-kyiv-2026-06-06.jpg"
+           alt="Багатосекційний щит керування двигунами — кабельні клеми та маркування" width="900" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Контактор ETI з тепловим реле — підключення до клемного блоку"
+         data-full="/images/dvyhuny/dvyhuny-eti-kontaktor-termorelay-klemnyy-blok-kyiv-2026-06-07.jpg">
+      <img src="/images/dvyhuny/dvyhuny-eti-kontaktor-termorelay-klemnyy-blok-kyiv-2026-06-07.jpg"
+           alt="Контактор ETI та теплове реле з клемним блоком у щиті двигуна" width="900" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Реле керування з маркуванням — релейна схема щита двигунів"
+         data-full="/images/dvyhuny/dvyhuny-kontaktory-markuvannia-releine-keruvannia-kyiv-2026-06-08.jpg">
+      <img src="/images/dvyhuny/dvyhuny-kontaktory-markuvannia-releine-keruvannia-kyiv-2026-06-08.jpg"
+           alt="Реле та контактори з маркуванням у щиті керування двигунами" width="1200" height="900" loading="lazy" />
+    </div>
+  </div>
+  <div class="em-gallery-cta">
+    <a href="/vykonani-roboty/" class="em-btn-primary">Переглянути всі роботи →</a>
+  </div>
+</section>
+
+<!-- ДЕ ЗАСТОСОВУЄТЬСЯ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Застосування</span>
+    <h2>Де застосовуються щити керування двигунами</h2>
+    <p class="em-lead">Використовуються там, де потрібен надійний і безпечний запуск електроприводу в автоматичному або ручному режимі.</p>
+    <div class="em-objects-grid">
+      <div class="em-object-card">
+        <div class="em-object-num">01</div>
+        <h3>Шнеки, міксери, мішалки</h3>
+        <p>Харчові та хімічні виробництва — де потрібен реверс або пуск з витримкою часу.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">02</div>
+        <h3>Вентиляційне обладнання</h3>
+        <p>Припливно-витяжні системи промислових і комерційних об'єктів, системи димовидалення.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">03</div>
+        <h3>Насосне обладнання</h3>
+        <p>Насосні станції водопостачання, пожежні насоси, системи теплопостачання.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">04</div>
+        <h3>Конвеєри та транспортери</h3>
+        <p>Виробничі лінії, склади, зернові комплекси — де потрібен реверс або почерговий пуск.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">05</div>
+        <h3>Виробничі лінії</h3>
+        <p>Технологічне обладнання з нестандартною логікою пуску або залежністю від датчиків.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">06</div>
+        <h3>Підрядні організації</h3>
+        <p>Електромонтажні компанії, які ведуть реконструкцію і потребують щит за схемою замовника.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ТИПИ ПУСКУ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Типи пуску</span>
+  <h2>Типи пуску — виготовляємо під будь-який</h2>
+  <p class="em-lead">Реалізуємо будь-який спосіб керування двигуном — під ваше технічне завдання та бюджет.</p>
+  <div class="em-why-grid">
+    <div class="em-why-card">
+      <h3>Прямий пуск (DOL)</h3>
+      <p>Пуск двигуна безпосереднім підключенням до мережі. Просте і надійне рішення для невеликих навантажень.</p>
+    </div>
+    <div class="em-why-card">
+      <h3>Реверс</h3>
+      <p>Пуск з можливістю зміни напрямку обертання. Застосовується на конвеєрах, транспортерах, мішалках.</p>
+    </div>
+    <div class="em-why-card">
+      <h3>Зірка-трикутник (Y/Δ)</h3>
+      <p>Знижений пусковий струм при старті з подальшим переходом на робочий режим. Підходить для двигунів із важким пуском.</p>
+    </div>
+    <div class="em-why-card">
+      <h3>Плавний пуск (софтстартер)</h3>
+      <p>Плавне нарощування напруги при пуску. Знижує механічні навантаження на привід і мережу.</p>
+    </div>
+    <div class="em-why-card">
+      <h3>Частотний перетворювач (ЧП)</h3>
+      <p>Повне керування швидкістю обертання. Оптимальне рішення для технологічних процесів із змінним навантаженням.</p>
+    </div>
+    <div class="em-why-card">
+      <h3>Керування через ПЛК</h3>
+      <p>Складні алгоритми: почергове вмикання, залежність від датчиків, нестандартна логіка. Програму розробляємо самостійно.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ПРОГРАМУВАННЯ ПЛК — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Автоматизація</span>
+    <h2>Програмування ПЛК для складних задач</h2>
+    <p class="em-lead">За необхідності реалізуємо складні алгоритми керування двигунами на базі програмованого логічного контролера. Розробляємо програму під ваше технічне завдання та тестуємо перед відправкою щита.</p>
+    <div class="em-objects-grid">
+      <div class="em-object-card">
+        <div class="em-object-num">01</div>
+        <h3>Почергове вмикання</h3>
+        <p>Почергове вмикання кількох двигунів із заданим інтервалом або по черзі за заданим алгоритмом.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">02</div>
+        <h3>Залежність від датчиків</h3>
+        <p>Запуск або зупинка двигуна залежно від сигналу датчика рівня, тиску, температури або зовнішнього сигналу.</p>
+      </div>
+      <div class="em-object-card">
+        <div class="em-object-num">03</div>
+        <h3>Нестандартна логіка</h3>
+        <p>Будь-який нестандартний алгоритм роботи обладнання — описуєте задачу словами, ми реалізуємо.</p>
+      </div>
+    </div>
+    <div style="margin-top: 28px;">
+      <a href="/posluhy-ta-produktsiia/plk" class="em-btn-outline">Детальніше про програмування ПЛК →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ХАРАКТЕРИСТИКИ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Характеристики</span>
+  <h2>Технічні характеристики щита керування двигунами</h2>
+  <table class="em-specs-table">
+    <tbody>
+      <tr><td class="em-specs-label">Кількість двигунів в одному щиті</td><td class="em-specs-value">від 1 до 12 і більше</td></tr>
+      <tr><td class="em-specs-label">Типи пуску</td><td class="em-specs-value">DOL, реверс, зірка-трикутник, софтстартер, ЧП</td></tr>
+      <tr><td class="em-specs-label">Режими керування</td><td class="em-specs-value">Ручний / Автоматичний / Дистанційний</td></tr>
+      <tr><td class="em-specs-label">Напруга живлення</td><td class="em-specs-value">220В / 380В</td></tr>
+      <tr><td class="em-specs-label">Виготовлення за схемами замовника</td><td class="em-specs-value">Так</td></tr>
+      <tr><td class="em-specs-label">Розробка схем під ТЗ</td><td class="em-specs-value">Так</td></tr>
+      <tr><td class="em-specs-label">Програмування ПЛК</td><td class="em-specs-value">Так — за необхідності</td></tr>
+      <tr><td class="em-specs-label">Гарантія</td><td class="em-specs-value">12 місяців</td></tr>
+      <tr><td class="em-specs-label">Термін виготовлення</td><td class="em-specs-value">від 1 тижня, узгоджується при постановці у виготовлення</td></tr>
+      <tr><td class="em-specs-label">Доставка</td><td class="em-specs-value">Київ, Київська область, вся Україна</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- КОМПОНЕНТИ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Компоненти</span>
+    <h2>Компоненти та виробники</h2>
+    <p class="em-lead">Підбираємо під бюджет та наявність. Конкретний бренд узгоджується при прийомі замовлення.</p>
+    <div class="em-brands">
+      <div class="em-brands-group">
+        <div class="em-brands-group-label">Основні бренди</div>
+        <div class="em-brands-row">
+          <div class="em-brand-pill">ETI</div>
+          <div class="em-brand-pill">Hager</div>
+          <div class="em-brand-pill">Schneider Electric</div>
+          <div class="em-brand-pill">Eaton</div>
+        </div>
+      </div>
+      <div class="em-brands-group">
+        <div class="em-brands-group-label">Економ-комплектація</div>
+        <div class="em-brands-row">
+          <div class="em-brand-pill secondary">E-Next</div>
+          <div class="em-brand-pill secondary">Asko</div>
+          <div class="em-brand-pill secondary">Chint</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ЯК МИ ПРАЦЮЄМО — білий -->
+<section class="em-section">
+  <span class="em-section-label">Як ми працюємо</span>
+  <h2>5 кроків від ТЗ до готового щита</h2>
+  <div class="em-steps-row">
+    <div class="em-step">
+      <div class="em-step-num">01</div>
+      <h3>Технічне завдання</h3>
+      <p>Надсилаєте ТЗ, схему або описуєте задачу. Приймаємо PDF, DWG, фото, усний опис.</p>
+    </div>
+    <div class="em-step">
+      <div class="em-step-num">02</div>
+      <h3>Розрахунок та схема</h3>
+      <p>Розробляємо або перевіряємо схему, узгоджуємо вартість та строки. Відповідаємо за 1–2 дні.</p>
+    </div>
+    <div class="em-step">
+      <div class="em-step-num">03</div>
+      <h3>Оплата</h3>
+      <p>Часткова або повна — після цього запускаємо щит у виробництво.</p>
+    </div>
+    <div class="em-step">
+      <div class="em-step-num">04</div>
+      <h3>Збірка та перевірка</h3>
+      <p>Збираємо у Києві. Маркуємо, перевіряємо кожен щит перед відправкою.</p>
+    </div>
+    <div class="em-step">
+      <div class="em-step-num">05</div>
+      <h3>Передача з документацією</h3>
+      <p>Доставка по Києву та Київській обл. або Нова Пошта. Паспорт виробу та схема — у щиті.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ПЕРЕВАГИ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Переваги</span>
+    <h2>Чому замовляють у нас</h2>
+    <div class="em-why-grid">
+      <div class="em-why-card"><h3>Досвід з 1999 року</h3><p>25+ років виготовлення щитів для промислових та комерційних об'єктів.</p></div>
+      <div class="em-why-card"><h3>Робота за проєктною документацією</h3><p>Приймаємо схеми від будь-якої проєктної організації та збираємо точно за ними.</p></div>
+      <div class="em-why-card"><h3>Розробляємо схеми самостійно</h3><p>Якщо проєкту ще немає — розробимо схему керування за описом задачі.</p></div>
+      <div class="em-why-card"><h3>Тестування перед відправкою</h3><p>Кожен щит перевіряється до передачі замовнику. Паспорт виробу — з кожним щитом.</p></div>
+      <div class="em-why-card"><h3>Доставка по всій Україні</h3><p>По Києву та Київській обл. — власним транспортом. По Україні — Новою Поштою.</p></div>
+      <div class="em-why-card"><h3>Гарантія 12 місяців</h3><p>На кожен виготовлений щит — письмове гарантійне зобов'язання.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ — білий -->
+<FaqAccordion items={faqItems} sectionTitle="Питання про щити керування двигунами" />
+
+<!-- КОНТАКТНИЙ БЛОК — зелений -->
+<ContactBlock title="Готові обговорити ваше замовлення — щит керування двигунами" />
+
+<!-- ТАКОЖ ВИГОТОВЛЯЄМО — білий -->
+<AlsoMake currentSlug="dvyhuny" />
+
+<!-- ФУТЕР -->
+<Footer />
+
+<!-- ЛАЙТБОКС -->
+<Lightbox />
+
+<script is:inline src="/js/em-site.js"></script>
+</body>
+</html>
