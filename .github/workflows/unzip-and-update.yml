@@ -27,110 +27,173 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Process Update or Rollback
+      - name: Unzip, Clean and Optimize Images
         id: process_step
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
-          # Надежное определение имени репозитория без имени автора
+          # Надежное вычисление имени репозитория для телефона
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
-          FINAL_LOG="tg_final_report.txt"
-          echo "📦 **Репозиторий:** \`$REPO_NAME\`" > $FINAL_LOG
-          echo "⏱️ **Время:** *$CURRENT_TIME*" >> $FINAL_LOG
-          
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
-          if [ ! -f "$ZIP_FILE" ]; then
-            echo "Архив не найден."
-            exit 0
-          fi
-          
-          ZIP_NAME=$(basename "$ZIP_FILE")
-          
-          # =========================================================================
-          # СЦЕНАРИЙ 1: ОТКАТ ПО БЭКАПУ (backup-rollback.zip)
-          # =========================================================================
-          if [ "$ZIP_NAME" = "backup-rollback.zip" ]; then
-            echo "⚡ **Что делали:** Откат по бэкапу" >> $FINAL_LOG
-            echo "" >> $FINAL_LOG
+          if [ -f "$ZIP_FILE" ]; then
             
-            mkdir ./temp_rollback
-            unzip -o "$ZIP_FILE" -d ./temp_rollback
+            # 1. Железный метод получения имен файлов напрямую из архива (как в первой версии!)
+            unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg|png)$" | tr -d '\r' > unzip_list.txt || true
             
-            if [ -f "./temp_rollback/delete.txt" ]; then
-              echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
-              while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
-                clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
-                if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
-                  rm "$clean_path"
-                  echo "\`$clean_path\`" >> $FINAL_LOG
-                fi
-              done < ./temp_rollback/delete.txt
-              echo "" >> $FINAL_LOG
-            fi
-            
-            rm -rf ./temp_rollback "$ZIP_FILE"
-            echo "🟢 **Откат успешно выполнен.**" >> $FINAL_LOG
-            echo "IS_ROLLBACK=true" >> $GITHUB_ENV
-            
-          # =========================================================================
-          # СЦЕНАРИЙ 2: ОБЫЧНОЕ ОБНОВЛЕНИЕ
-          # =========================================================================
-          else
-            echo "⚡ **Что делали:** Обновление проекта и проверка photo" >> $FINAL_LOG
-            echo "" >> $FINAL_LOG
-            
+            # 2. Распаковываем во временную папку
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
             
+            # 3. Удаление файлов по списку delete.txt
             if [ -f "./temp_unzip/delete.txt" ]; then
-              echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
                 if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
                   rm "$clean_path"
-                  echo "\`$clean_path\`" >> $FINAL_LOG
                 fi
               done < ./temp_unzip/delete.txt
               rm ./temp_unzip/delete.txt
-              echo "" >> $FINAL_LOG
             fi
             
-            # Переносим новые файлы в корень проекта
-            if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
-              cp -rf ./temp_unzip/* ./
-            fi
+            # 4. Переносим файлы на место и чистим входящий архив, чтобы папка была пустой
+            cp -rf ./temp_unzip/* ./
+            rm -rf ./temp_unzip
+            rm "$ZIP_FILE"
             
-            # Создание бэкапа-противоядия
-            ALL_ARCHIVE_FILES=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -v -E "(^$|^\.|.*/$)" | tr -d '\r' || true)
-            BACKUP_DIR="./ai-updates/backups"
-            mkdir -p "$BACKUP_DIR"
-            rm -rf ./temp_backup && mkdir ./temp_backup
-            
-            echo "$ALL_ARCHIVE_FILES" | while read -r f; do
-              f_clean=$(echo "$f" | xargs)
-              if [ -n "$f_clean" ] && [ "$f_clean" != "delete.txt" ] && [ -f "$f_clean" ]; then
-                echo "$f_clean" >> ./temp_backup/delete.txt
-              fi
-            done
-            
-            BACKUP_CREATED="false"
-            if [ -f "./temp_backup/delete.txt" ]; then
-              cd ./temp_backup && zip -r ../backup-rollback.zip delete.txt && cd ..
-              mv backup-rollback.zip "$BACKUP_DIR/backup-rollback.zip"
-              BACKUP_CREATED="true"
-            fi
-            
-            # Входящий zip удаляем немедленно, чтобы очистить git-репозиторий
-            rm -rf ./temp_backup "$ZIP_FILE"
-            
+            # 5. Ставим sharp
             npm install sharp --no-save
             
-            # Контролируемый Node.js процесс для сбора путей и оптимизации фото
+            # 6. Твой оригинальный Node.js код, который гарантированно выводит имена
             node -e '
             const fs = require("fs");
-            const path = require("path");
             const sharp = require("sharp");
             
-            function getImages
+            async function processImages() {
+              const reportFile = "tg_image_report.txt";
+              const listFile = "unzip_list.txt";
+              
+              // Добавляем имя репозитория в заголовок отчета
+              fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱️ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n\n`);
+              
+              if (!fs.existsSync(listFile)) {
+                fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
+                return;
+              }
+              
+              const content = fs.readFileSync(listFile, "utf8");
+              const allFiles = content.split("\n")
+                .map(f => f.trim())
+                .filter(f => f && (f.endsWith(".jpg") || f.endsWith(".jpeg") || f.endsWith(".png")) && fs.existsSync(f));
+              
+              if (allFiles.length === 0) {
+                fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
+                if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
+                return;
+              }
+              
+              for (const file of allFiles) {
+                try {
+                  const stat = fs.statSync(file);
+                  let origSizeKB = Math.round(stat.size / 1024);
+                  let origSizeStr = origSizeKB >= 1024 ? (origSizeKB / 1024).toFixed(1) + " MB" : origSizeKB + " KB";
+                  
+                  const image = sharp(file);
+                  const meta = await image.metadata();
+                  
+                  if (meta.width <= 1200) {
+                    fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} — ОК\n`);
+                  } else {
+                    const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+                    fs.writeFileSync(file, buffer);
+                    
+                    let newSizeKB = Math.round(buffer.length / 1024);
+                    let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
+                    
+                    fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
+                  }
+                } catch (err) {
+                  fs.appendFileSync(reportFile, `• \`${file}\` — ошибка анализа\n`);
+                }
+              }
+              
+              if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
+            }
+            processImages().catch(err => {
+              fs.appendFileSync("tg_image_report.txt", "🔴 Ошибка скрипта обработки фото\n");
+              process.exit(1);
+            });
+            '
+            
+            {
+              echo 'IMAGE_REPORT<<EOF'
+              cat tg_image_report.txt
+              echo 'EOF'
+            } >> $GITHUB_ENV
+            rm -f tg_image_report.txt
+            
+          else
+            echo "Архив не найден."
+            exit 1
+          fi
+
+      # Отправка инспекции фото сразу после распаковки
+      - name: Send Image Inspection Report
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            ${{ env.IMAGE_REPORT }}
+
+      # Тестируем сборку Astro
+      - name: Install dependencies & Test Astro Build
+        run: |
+          npm install
+          npm run build
+
+      # Коммитим изменения только при успешной сборке (как ты и просил, ломаный код не пушим!)
+      - name: Commit and Push changes
+        if: success()
+        run: |
+          git add .
+          if git diff --staged --quiet; then
+            echo "Изменений нет."
+          else
+            git commit -m "🤖 Авто-обновление сайта (Проверка успешна)"
+            git push origin ${{ github.ref_name }}
+          fi
+
+      # Получаем финальный таймштамп для уведомления о результате сборки
+      - name: Get Final Timestamp
+        if: always()
+        run: |
+          export TZ="Europe/Bratislava"
+          echo "FINAL_TIME=$(date +"%H:%M:%S")" >> $GITHUB_ENV
+
+      # Итоговое сообщение об успехе сборки
+      - name: Send Success Telegram Message
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            ⏱️ *${{ env.FINAL_TIME }}*
+            🟢 **Обновление успешно (Astro Build развернут)**
+
+      # Итоговое сообщение о падении сборки (ты увидишь его на телефоне и пойдешь в веб Гита смотреть логи)
+      - name: Send Failure Telegram Message
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            ⏱️ *${{ env.FINAL_TIME }}*
+            🔴 **Ошибка обновления (Astro Build упал)**
