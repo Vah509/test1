@@ -79,11 +79,11 @@ jobs:
             echo "⚡ **Что делали:** Обновление проекта и проверка фото" >> $FINAL_LOG
             echo "" >> $FINAL_LOG
             
+            # Твой оригинальный рабочий способ получения списка имен файлов
+            unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg)$" | tr -d '\r' > unzip_list.txt || true
+            
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
-            
-            # Составляем список картинок из реальных файлов на диске
-            find ./temp_unzip -type f \( -name "*.jpg" -o -name "*.jpeg" \) | sed 's|./temp_unzip/||' > unzip_list.txt || true
             
             # Удаление файлов по запросу ИИ
             if [ -f "./temp_unzip/delete.txt" ]; then
@@ -99,7 +99,7 @@ jobs:
               echo "" >> $FINAL_LOG
             fi
             
-            # Накатываем новые файлы в корень
+            # Накатываем новые файлы
             if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
               cp -rf ./temp_unzip/* ./
             fi
@@ -129,12 +129,12 @@ jobs:
             # Ставим sharp
             npm install sharp --no-save
             
-            # Запускаем Node.js для анализа картинок
+            # Твой оригинальный рабочий Node.js блок с подстановкой лога через bash
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
             
-            async function run() {
+            async function processImages() {
               const logFile = "tg_final_report.txt";
               const listFile = "unzip_list.txt";
               
@@ -145,36 +145,45 @@ jobs:
                 return;
               }
               
-              const files = fs.readFileSync(listFile, "utf8").split("\n").map(s => s.trim()).filter(Boolean);
-              if (files.length === 0) {
+              const content = fs.readFileSync(listFile, "utf8");
+              const allFiles = content.split("\n")
+                .map(f => f.trim())
+                .filter(f => f && (f.endsWith(".jpg") || f.endsWith(".jpeg")) && fs.existsSync(f));
+              
+              if (allFiles.length === 0) {
                 fs.appendFileSync(logFile, "Новых изображений в архиве нет.\n\n");
+                if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
                 return;
               }
               
-              for (const f of files) {
-                if (!fs.existsSync(f)) continue;
+              for (const file of allFiles) {
                 try {
-                  const stat = fs.statSync(f);
-                  let oldSize = Math.round(stat.size / 1024) + " KB";
-                  const img = sharp(f);
-                  const meta = await img.metadata();
+                  const stat = fs.statSync(file);
+                  let origSizeKB = Math.round(stat.size / 1024);
+                  let origSizeStr = origSizeKB >= 1024 ? (origSizeKB / 1024).toFixed(1) + " MB" : origSizeKB + " KB";
+                  
+                  const image = sharp(file);
+                  const meta = await image.metadata();
                   
                   if (meta.width <= 1200) {
-                    fs.appendFileSync(logFile, "`" + f + "` — " + oldSize + " — ОК\n");
+                    fs.appendFileSync(logFile, `\`${file}\` — ${origSizeStr} — ОК\n`);
                   } else {
-                    const buf = await img.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
-                    fs.writeFileSync(f, buf);
-                    let newSize = Math.round(buf.length / 1024) + " KB";
-                    fs.appendFileSync(logFile, "`" + f + "` — " + oldSize + " -> " + newSize + " — ОПТ\n");
+                    const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+                    fs.writeFileSync(file, buffer);
+                    
+                    let newSizeKB = Math.round(buffer.length / 1024);
+                    let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
+                    
+                    fs.appendFileSync(logFile, `\`${file}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
                   }
-                } catch (e) {
-                  fs.appendFileSync(logFile, "`" + f + "` — ошибка анализа\n");
+                } catch (err) {
+                  fs.appendFileSync(logFile, `\`${file}\` — ошибка анализа\n`);
                 }
               }
               fs.appendFileSync(logFile, "\n");
               if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
             }
-            run();
+            processImages();
             '
             
             if [ "$BACKUP_CREATED" = "true" ]; then
