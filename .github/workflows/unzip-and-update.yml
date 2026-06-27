@@ -33,13 +33,12 @@ jobs:
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
-          # Надежное вычисление имени репозитория для телефона
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
           if [ -f "$ZIP_FILE" ]; then
             
-            # 1. Железный метод получения имен файлов напрямую из архива (как в первой версии!)
+            # 1. Получаем список картинок из архива
             unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg|png)$" | tr -d '\r' > unzip_list.txt || true
             
             # 2. Распаковываем во временную папку
@@ -57,7 +56,7 @@ jobs:
               rm ./temp_unzip/delete.txt
             fi
             
-            # 4. Переносим файлы на место и чистим входящий архив, чтобы папка была пустой
+            # 4. Переносим файлы на место и чистим входящий архив
             cp -rf ./temp_unzip/* ./
             rm -rf ./temp_unzip
             rm "$ZIP_FILE"
@@ -65,7 +64,7 @@ jobs:
             # 5. Ставим sharp
             npm install sharp --no-save
             
-            # 6. Твой оригинальный Node.js код, который гарантированно выводит имена
+            # 6. Запускаем Node.js скрипт
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
@@ -74,12 +73,8 @@ jobs:
               const reportFile = "tg_image_report.txt";
               const listFile = "unzip_list.txt";
               
-              // Добавляем имя репозитория в заголовок отчета
-              fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱️ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n\n`);
-              
               if (!fs.existsSync(listFile)) {
-                fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
-                return;
+                return; // Если файла списка нет, ничего не пишем (сообщение не создается)
               }
               
               const content = fs.readFileSync(listFile, "utf8");
@@ -88,10 +83,12 @@ jobs:
                 .filter(f => f && (f.endsWith(".jpg") || f.endsWith(".jpeg") || f.endsWith(".png")) && fs.existsSync(f));
               
               if (allFiles.length === 0) {
-                fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
                 if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
-                return;
+                return; // Если картинок нет (например, это откат), выходим, не создавая пустой отчет
               }
+              
+              // Создаем заголовок только если картинки реально есть
+              fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n\n`);
               
               for (const file of allFiles) {
                 try {
@@ -126,11 +123,14 @@ jobs:
             });
             '
             
-            {
-              echo 'IMAGE_REPORT<<EOF'
-              cat tg_image_report.txt
-              echo 'EOF'
-            } >> $GITHUB_ENV
+            # Экспортируем переменную только если файл отчета был создан и он не пустой
+            if [ -s tg_image_report.txt ]; then
+              {
+                echo 'IMAGE_REPORT<<EOF'
+                cat tg_image_report.txt
+                echo 'EOF'
+              } >> $GITHUB_ENV
+            fi
             rm -f tg_image_report.txt
             
           else
@@ -138,9 +138,9 @@ jobs:
             exit 1
           fi
 
-      # Отправка инспекции фото сразу после распаковки
+      # Отправка инспекции фото — ТЕПЕРЬ СТРОГО ЕСЛИ ТЕКСТ ЕСТЬ (Защита от пустых сообщений)
       - name: Send Image Inspection Report
-        if: always()
+        if: always() && env.IMAGE_REPORT != ''
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -155,7 +155,7 @@ jobs:
           npm install
           npm run build
 
-      # Коммитим изменения только при успешной сборке (как ты и просил, ломаный код не пушим!)
+      # Коммитим изменения только при успешной сборке
       - name: Commit and Push changes
         if: success()
         run: |
@@ -167,7 +167,7 @@ jobs:
             git push origin ${{ github.ref_name }}
           fi
 
-      # Получаем финальный таймштамп для уведомления о результате сборки
+      # Получаем финальный таймштамп
       - name: Get Final Timestamp
         if: always()
         run: |
@@ -186,7 +186,7 @@ jobs:
             ⏱️ *${{ env.FINAL_TIME }}*
             🟢 **Обновление успешно (Astro Build развернут)**
 
-      # Итоговое сообщение о падении сборки (ты увидишь его на телефоне и пойдешь в веб Гита смотреть логи)
+      # Итоговое сообщение о падении сборки
       - name: Send Failure Telegram Message
         if: failure()
         uses: appleboy/telegram-action@master
