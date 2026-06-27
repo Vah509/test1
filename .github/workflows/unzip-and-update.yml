@@ -35,7 +35,6 @@ jobs:
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
-          # Файлы для накопления лога
           FINAL_LOG="tg_final_report.txt"
           echo "📦 **Репозиторий:** \`$ENV_REPO_NAME\`" > $FINAL_LOG
           echo "⏱️ **Время:** *$CURRENT_TIME*" >> $FINAL_LOG
@@ -84,10 +83,8 @@ jobs:
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
             
-            # Составляем список картинок строго ПОСЛЕ распаковки из реальных файлов на диске
-            find ./temp_unzip -type f \( -name "*.jpg" -o -name "*.jpeg" \) | sed 's|./temp_unzip/||' > unzip_list.txt || true
+            find ./temp_unzip -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \) | sed 's|./temp_unzip/||' > unzip_list.txt || true
             
-            # Удаление файлов по запросу ИИ
             if [ -f "./temp_unzip/delete.txt" ]; then
               echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
@@ -101,13 +98,12 @@ jobs:
               echo "" >> $FINAL_LOG
             fi
             
-            # Накатываем новые файлы в корень
             if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
               cp -rf ./temp_unzip/* ./
             fi
             rm -rf ./temp_unzip
             
-            # Создаем бэкап-противоядие
+            # Создание бэкапа-противоядия
             ALL_ARCHIVE_FILES=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -v -E "(^$|^\.|.*/$)" | tr -d '\r' || true)
             BACKUP_DIR="./ai-updates/backups"
             mkdir -p "$BACKUP_DIR"
@@ -126,12 +122,13 @@ jobs:
               mv backup-rollback.zip "$BACKUP_DIR/backup-rollback.zip"
               BACKUP_CREATED="true"
             fi
+            
+            # Входящий архив удаляем СРАЗУ, чтобы виртуалка была чистой
             rm -rf ./temp_backup "$ZIP_FILE"
             
-            # Ставим sharp
             npm install sharp --no-save
             
-            # Запускаем Node.js для анализа картинок по готовому списку файлов
+            # Стабильный Node.js с жестким контролем асинхронности
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
@@ -176,7 +173,10 @@ jobs:
               fs.appendFileSync(logFile, "\n");
               if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
             }
-            run();
+            run().catch(err => {
+              fs.appendFileSync("tg_final_report.txt", "🔴 Ошибка скрипта оптимизации изображений\n");
+              process.exit(1);
+            });
             '
             
             if [ "$BACKUP_CREATED" = "true" ]; then
@@ -187,7 +187,6 @@ jobs:
             echo "IS_ROLLBACK=false" >> $GITHUB_ENV
           fi
           
-          # Переносим накопленный лог в окружение Гитхаба
           {
             echo 'TG_REPORT_BODY<<EOF'
             cat $FINAL_LOG
@@ -231,7 +230,7 @@ jobs:
           cat report_env.txt >> $GITHUB_ENV
           rm report_env.txt
 
-      # Сохраняем изменения в гит (если всё прошло успешно)
+      # Сохраняем изменения в гит (Только если ВСЁ прошло успешно!)
       - name: Commit and Push changes
         if: success()
         run: |
@@ -247,7 +246,7 @@ jobs:
             git push origin ${{ github.ref_name }}
           fi
 
-      # Единая отправка итогового сообщения в Telegram
+      # Единая отправка сообщения в Telegram в любом случае
       - name: Send Final Telegram Notification
         if: always() && env.IMAGE_REPORT != ''
         uses: appleboy/telegram-action@master
