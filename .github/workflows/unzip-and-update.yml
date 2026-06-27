@@ -27,13 +27,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-     - name: Stage 1: Process Files & Images
+      - name: Stage 1: Process Files & Images
         id: stage_one
         env:
           ENV_REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          export TZ="Europe/Bratislava"
-          CURRENT_TIME=$(date +"%H:%M:%S")
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
