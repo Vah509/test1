@@ -32,16 +32,19 @@ jobs:
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
-          
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
           
-          # ЗАЩИТА №2: Если экшен сработал на УДАЛЕНИЕ архива, просто выходим без ошибки
+          # Если архив не найден (его удалили вручную) — выключаем все следующие шаги и выходим
           if [ ! -f "$ZIP_FILE" ]; then
-            echo "🟢 Архив удален вручную. Скрипту нечего обрабатывать. Завершаем успешно."
+            echo "ARCHIVE_EXISTS=false" >> $GITHUB_ENV
+            echo "🟢 Архив удален вручную. Скрипт остановлен, сборка Astro пропущена."
             exit 0
           fi
+          
+          # Если архив есть, даем зеленый свет остальным шагам
+          echo "ARCHIVE_EXISTS=true" >> $GITHUB_ENV
           
           # 1. Получаем список картинок из архива
           unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg|png)$" | tr -d '\r' > unzip_list.txt || true
@@ -61,7 +64,7 @@ jobs:
             rm ./temp_unzip/delete.txt
           fi
           
-          # ЗАЩИТА №1: Переносим файлы ТОЛЬКО если папкаtemp_unzip не пустая
+          # Переносим файлы ТОЛЬКО если папка temp_unzip не пустая
           if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
             cp -rf ./temp_unzip/* ./
           fi
@@ -92,7 +95,7 @@ jobs:
               return;
             }
             
-            fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n\n`);
+            fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱ *'${CURRENT_TIME}'*\n📸 *Инспекция photo:*\n\n`);
             
             for (const file of allFiles) {
               try {
@@ -136,9 +139,9 @@ jobs:
           fi
           rm -f tg_image_report.txt
 
-      # Отправка инспекции фото — строго если текст есть
+      # Отправка инспекции фото — строго если файл архива БЫЛ и текст отчета готов
       - name: Send Image Inspection Report
-        if: always() && env.IMAGE_REPORT != ''
+        if: always() && env.ARCHIVE_EXISTS == 'true' && env.IMAGE_REPORT != ''
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -147,15 +150,16 @@ jobs:
           message: |
             ${{ env.IMAGE_REPORT }}
 
-      # Тестируем сборку Astro
+      # Тестируем сборку Astro — СТРОГО ЕСЛИ АРХИВ БЫЛ РАСПАКОВАН
       - name: Install dependencies & Test Astro Build
+        if: success() && env.ARCHIVE_EXISTS == 'true'
         run: |
           npm install
           npm run build
 
-      # Коммитим изменения только при успешной сборке
+      # Коммитим изменения — СТРОГО ЕСЛИ АРХИВ БЫЛ РАСПАКОВАН
       - name: Commit and Push changes
-        if: success()
+        if: success() && env.ARCHIVE_EXISTS == 'true'
         run: |
           git add .
           if git diff --staged --quiet; then
@@ -165,16 +169,16 @@ jobs:
             git push origin ${{ github.ref_name }}
           fi
 
-      # Получаем финальный таймштамп
+      # Получаем финальный таймштамп — СТРОГО ЕСЛИ АРХИВ БЫЛ РАСПАКОВАН
       - name: Get Final Timestamp
-        if: always()
+        if: always() && env.ARCHIVE_EXISTS == 'true'
         run: |
           export TZ="Europe/Bratislava"
           echo "FINAL_TIME=$(date +"%H:%M:%S")" >> $GITHUB_ENV
 
-      # Итоговое сообщение об успехе сборки
+      # Итоговое сообщение об успехе — СТРОГО ЕСЛИ АРХИВ БЫЛ РАСПАКОВАН
       - name: Send Success Telegram Message
-        if: success()
+        if: success() && env.ARCHIVE_EXISTS == 'true'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -184,9 +188,9 @@ jobs:
             ⏱️ *${{ env.FINAL_TIME }}*
             🟢 **Обновление успешно (Astro Build развернут)**
 
-      # Итоговое сообщение о падении сборки
+      # Итоговое сообщение о падении — СТРОГО ЕСЛИ АРХИВ БЫЛ РАСПАКОВАН
       - name: Send Failure Telegram Message
-        if: failure()
+        if: failure() && env.ARCHIVE_EXISTS == 'true'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
