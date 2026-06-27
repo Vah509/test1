@@ -1,0 +1,180 @@
+/* ============================================================
+   СТИЛІ СТОРІНКИ — Контакти / em-kontakty.css
+   elektromontazh.kiev.ua
+   Підключати після: main.css
+   ============================================================ */
+
+/* ════════════════════════════════════════
+   ВЕЛИКИЙ ТЕЛЕФОН
+════════════════════════════════════════ */
+.em-kontakty-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--ff);
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  color: var(--c-head);
+  text-decoration: none;
+  margin: 28px 0 32px;
+  transition: color var(--transition);
+}
+.em-kontakty-phone:hover { color: var(--c-accent); }
+.em-kontakty-phone-icon {
+  width: 36px;
+  height: 36px;
+  fill: var(--c-accent);
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════
+   ІНФО-КАРТКИ (email / адреса / месенджери)
+════════════════════════════════════════ */
+.em-kontakty-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.em-kontakty-info-card {
+  background: #fff;
+  border: 1.5px solid var(--c-accent-border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.em-kontakty-info-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-family: var(--ff-body);
+}
+.em-kontakty-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--c-head);
+  font-family: var(--ff-body);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+a.em-kontakty-info-value:hover { color: var(--c-accent); }
+
+/* ════════════════════════════════════════
+   КНОПКИ ЗВ'ЯЗКУ — повторюємо ContactBlock
+════════════════════════════════════════ */
+.em-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 40px;
+}
+.em-contact-card {
+  background: #fff;
+  border: 1.5px solid var(--c-accent-border);
+  border-radius: var(--radius);
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  text-align: center;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.em-contact-card:hover {
+  border-color: var(--c-accent);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+.em-contact-card-icon { width: 26px; height: 26px; fill: var(--c-accent); }
+.em-contact-card-viber .em-contact-card-icon { fill: #7360f2; }
+.em-contact-card-telegram .em-contact-card-icon { fill: #29a9eb; }
+.em-contact-card-whatsapp .em-contact-card-icon { fill: #25d366; }
+.em-contact-card-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--c-head);
+  font-family: var(--ff-body);
+}
+
+/* ════════════════════════════════════════
+   ГРАФІК РОБОТИ
+════════════════════════════════════════ */
+.em-kontakty-schedule {
+  background: #fff;
+  border: 1.5px solid var(--c-accent-border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  max-width: 480px;
+}
+.em-kontakty-schedule-title {
+  font-family: var(--ff);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c-head);
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+.em-kontakty-schedule-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.em-schedule-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--c-divider);
+  font-family: var(--ff-body);
+  font-size: 14px;
+}
+.em-schedule-row:last-child { border-bottom: none; }
+.em-schedule-day {
+  color: var(--c-text);
+  font-weight: 500;
+}
+.em-schedule-row--work .em-schedule-day { color: var(--c-head); }
+.em-schedule-row--off .em-schedule-day { color: var(--c-muted); }
+.em-schedule-time {
+  font-weight: 600;
+  color: var(--c-accent);
+}
+.em-schedule-off {
+  font-weight: 400;
+  color: var(--c-muted);
+}
+
+/* ════════════════════════════════════════
+   КАРТА
+════════════════════════════════════════ */
+.em-kontakty-map-wrap {
+  margin-top: 8px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1.5px solid var(--c-accent-border);
+  box-shadow: var(--shadow-card);
+}
+.em-kontakty-map-cta {
+  margin-top: 20px;
+}
+
+/* ════════════════════════════════════════
+   АДАПТИВ
+════════════════════════════════════════ */
+@media (min-width: 601px) and (max-width: 900px) {
+  .em-kontakty-info-grid { grid-template-columns: 1fr 1fr !important; }
+  .em-contact-grid       { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+@media (max-width: 600px) {
+  .em-kontakty-info-grid { grid-template-columns: 1fr !important; }
+  .em-contact-grid       { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+  .em-contact-card       { padding: 12px 6px !important; }
+  .em-kontakty-schedule  { padding: 20px !important; max-width: 100% !important; }
+  .em-kontakty-phone     { font-size: 26px !important; }
+}
