@@ -1,0 +1,407 @@
+---
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ContactBlock from '../../components/ContactBlock.astro';
+
+const title = "Послуги та продукція — виготовлення електрощитів | elektromontazh.kiev.ua";
+const description = "Виготовлення силових щитів, щитів керування, КРМ, димовидалення. Програмування ПЛК, електромонтажні роботи. Гарантія 12 місяців. Київ та вся Україна.";
+---
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href="https://elektromontazh.kiev.ua/posluhy-ta-produktsiia/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    /* ══════════════════════════════════════
+       HUB HERO
+    ══════════════════════════════════════ */
+    .em-hub-hero {
+      background: var(--c-bg2);
+      border-bottom: 2px solid var(--c-accent-border);
+      padding: 56px 24px 48px;
+    }
+    .em-hub-hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .em-hub-hero-inner h1 {
+      margin: 10px 0 14px;
+    }
+    .em-hub-hero-lead {
+      font-family: var(--ff-body);
+      font-size: 17px;
+      color: var(--c-muted);
+      max-width: 620px;
+      line-height: 1.65;
+      margin: 0;
+    }
+    .em-hub-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    /* ══════════════════════════════════════
+       HUB SECTION HEADER (назва групи)
+    ══════════════════════════════════════ */
+    .em-hub-section-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .em-hub-section-title h2 {
+      font-family: var(--ff);
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: 700;
+      color: var(--c-head);
+      margin: 0;
+      white-space: nowrap;
+    }
+    .em-hub-title-line {
+      flex: 1;
+      height: 1px;
+      background: var(--c-divider);
+    }
+    .em-hub-title-count {
+      font-family: var(--ff-body);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--c-muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════
+       HUB GRID — продукція 4 колонки
+    ══════════════════════════════════════ */
+    .em-hub-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .em-hub-grid-services {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 680px;
+      margin-bottom: 0;
+    }
+
+    /* ══════════════════════════════════════
+       HUB CARD
+    ══════════════════════════════════════ */
+    .em-hub-card {
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px 20px;
+      background: #fff;
+      border: 1.5px solid var(--c-accent-border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .em-hub-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--c-accent);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .em-hub-card:hover {
+      border-color: var(--c-accent);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-3px);
+    }
+    .em-hub-card:hover::before {
+      opacity: 1;
+    }
+
+    .em-hub-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--c-accent-faint);
+      border: 1px solid var(--c-accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .em-hub-card:hover .em-hub-card-icon {
+      background: var(--c-accent-mid);
+    }
+    .em-hub-card-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--c-accent);
+    }
+
+    .em-hub-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .em-hub-card-body h3 {
+      font-family: var(--ff);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--c-head);
+      margin: 0 0 8px;
+      line-height: 1.35;
+    }
+    .em-hub-card-body p {
+      font-family: var(--ff-body);
+      font-size: 12.5px;
+      color: var(--c-muted);
+      line-height: 1.55;
+      margin: 0 0 16px;
+      flex: 1;
+    }
+    .em-hub-card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--ff-body);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--c-accent);
+      margin-top: auto;
+      transition: gap .15s;
+    }
+    .em-hub-card:hover .em-hub-card-link {
+      gap: 8px;
+    }
+    .em-hub-card-link svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════
+       SERVICE CARD — трохи більша
+    ══════════════════════════════════════ */
+    .em-hub-card-service {
+      padding: 28px 24px 24px;
+    }
+    .em-hub-card-service .em-hub-card-icon {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 18px;
+    }
+    .em-hub-card-service .em-hub-card-icon svg {
+      width: 26px;
+      height: 26px;
+    }
+    .em-hub-card-service .em-hub-card-body h3 {
+      font-size: 15px;
+    }
+    .em-hub-card-service .em-hub-card-body p {
+      font-size: 13.5px;
+    }
+
+    /* ══════════════════════════════════════
+       АДАПТИВ
+    ══════════════════════════════════════ */
+    @media (min-width: 901px) and (max-width: 1100px) {
+      .em-hub-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    }
+    @media (min-width: 601px) and (max-width: 900px) {
+      .em-hub-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .em-hub-grid-services { grid-template-columns: 1fr !important; max-width: 100% !important; }
+      .em-hub-hero { padding: 40px 16px 36px !important; }
+    }
+    @media (max-width: 600px) {
+      .em-hub-grid { grid-template-columns: 1fr !important; }
+      .em-hub-grid-services { grid-template-columns: 1fr !important; max-width: 100% !important; }
+      .em-hub-hero { padding: 36px 16px 32px !important; }
+      .em-hub-badges { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<Header activePage="produktsiia" />
+
+<Breadcrumbs
+  current="Послуги та продукція"
+  parentLabel="Головна"
+  parentHref="/"
+/>
+
+<!-- HERO -->
+<div class="em-hub-hero">
+  <div class="em-hub-hero-inner">
+    <span class="em-section-label">Виробництво · Київ та область</span>
+    <h1>Послуги та продукція</h1>
+    <p class="em-hub-hero-lead">Виготовляємо силові щити та щити керування будь-якої складності. Працюємо за вашими схемами або розробляємо з нуля. Гарантія 12 місяців, терміни від 2 тижнів.</p>
+    <div class="em-hub-badges">
+      <div class="em-badge"><strong>25 років</strong> — досвід</div>
+      <div class="em-badge"><strong>від 2 тижнів</strong> — терміни</div>
+      <div class="em-badge"><strong>12 міс.</strong> — гарантія</div>
+      <div class="em-badge"><strong>ETI · Hager · Schneider · Eaton</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ПРОДУКЦІЯ + ПОСЛУГИ -->
+<section class="em-section">
+
+  <!-- Продукція -->
+  <div class="em-hub-section-title">
+    <h2>Продукція</h2>
+    <div class="em-hub-title-line"></div>
+    <span class="em-hub-title-count">7 видів щитів</span>
+  </div>
+
+  <div class="em-hub-grid">
+
+    <!-- ГРЩ / ВРЩ -->
+    <a href="/posluhy-ta-produktsiia/hrshch" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h16v2H4zm0 4h4v6H4zm6 0h10v6H10z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>ГРЩ / ВРЩ — силові щити</h3>
+        <p>Головні та вводно-розподільчі щити до 630А. Одно- та багатовводні, за проектом або ТЗ.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Димовидалення -->
+    <a href="/posluhy-ta-produktsiia/dymovydalennia" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 9c0-3.87-3.13-7-7-7S5 5.13 5 9c0 2.93 1.81 5.46 4.37 6.53L8 22h8l-1.38-6.47C17.19 14.46 19 11.93 19 9zm-7-5c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5 2.24-5 5-5z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Щити димовидалення</h3>
+        <p>Димовидалення, підпір повітря, керування протипожежними клапанами. Зональне керування, від АУПС.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Двигуни -->
+    <a href="/posluhy-ta-produktsiia/dvyhuny" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 4a6 6 0 110 12A6 6 0 0112 6zm0 2a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Щити керування двигунами</h3>
+        <p>Прямий пуск, реверс, зірка-трикутник, софтстартер, частотний перетворювач. Від 1 до 12+ двигунів.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- ШУЗ -->
+    <a href="/posluhy-ta-produktsiia/shuz" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 12h2v3H3zm4-3h2v6H7zm4-4h2v10h-2zm4 2h2v8h-2zm4 3h2v5h-2z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Щити керування засувками (ШУЗ)</h3>
+        <p>Керування електроприводними засувками. Місцевий, дистанційний, автоматичний режими. Від 1 до 32+ приводів.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- КРМ -->
+    <a href="/posluhy-ta-produktsiia/krm" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>КРМ — конденсаторні установки</h3>
+        <p>Компенсація реактивної потужності. Автоматичний регулятор cos φ ≥ 0,95. Розрахунок за вашими даними.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Зенітні ліхтарі -->
+    <a href="/posluhy-ta-produktsiia/zenitni-lihtari" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 7a5 5 0 100 10A5 5 0 0012 7zM2 13h2a8.001 8.001 0 000-2H2v2zm18 0h2v-2h-2a8 8 0 010 2zM11 2v2a8 8 0 012 0V2h-2zm0 18v2h2v-2a8.001 8.001 0 01-2 0z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Щити керування зенітними ліхтарями</h3>
+        <p>Фрамуги, люки, протипожежне відкриття від АУПС. Зональне керування, провітрювання за розкладом.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Агро -->
+    <a href="/posluhy-ta-produktsiia/ahro" class="em-hub-card">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Електрощити для агрогосподарств</h3>
+        <p>Вентиляція, аерація, кормові системи. Корівники, свинарники, зерносховища, тепличні господарства.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Послуги -->
+  <div class="em-hub-section-title">
+    <h2>Послуги</h2>
+    <div class="em-hub-title-line"></div>
+    <span class="em-hub-title-count">2 послуги</span>
+  </div>
+
+  <div class="em-hub-grid em-hub-grid-services">
+
+    <!-- ПЛК -->
+    <a href="/posluhy-ta-produktsiia/plk" class="em-hub-card em-hub-card-service">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 3H4a1 1 0 00-1 1v16a1 1 0 001 1h16a1 1 0 001-1V4a1 1 0 00-1-1zm-1 16H5V5h14v14zM7 7h2v2H7zm4 0h6v2h-6zm-4 4h2v2H7zm4 0h6v2h-6zm-4 4h2v2H7zm4 0h6v2h-6z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Програмування ПЛК</h3>
+        <p>Розробка програм для Siemens LOGO!, Schneider Zelio, Eaton Easy, ОВЕН та інших. Окремо або разом зі збіркою щита. Будь-яка логіка керування під ваше ТЗ.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Електромонтаж -->
+    <a href="/posluhy-ta-produktsiia/elektromontazh" class="em-hub-card em-hub-card-service">
+      <div class="em-hub-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="em-hub-card-body">
+        <h3>Електромонтажні роботи</h3>
+        <p>Прокладання кабельних трас, монтаж та підключення щитів, підключення технологічного обладнання, пусконаладка. Промислові об'єкти, склади, агропідприємства.</p>
+        <span class="em-hub-card-link">Детальніше <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></span>
+      </div>
+    </a>
+
+  </div>
+
+</section>
+
+<!-- КОНТАКТНИЙ БЛОК -->
+<ContactBlock title="Готові обговорити ваше замовлення" />
+
+<Footer />
+
+<script is:inline src="/js/em-site.js"></script>
+</body>
+</html>
