@@ -1,0 +1,238 @@
+---
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
+import AlsoMake from '../../components/AlsoMake.astro';
+import ContactBlock from '../../components/ContactBlock.astro';
+import Lightbox from '../../components/Lightbox.astro';
+
+const title = "Програмування ПЛК на замовлення — Київ та область | elektromontazh.kiev.ua";
+const description = "Програмування логічних контролерів під ваше технічне завдання. Керування двигунами, насосами, вентиляцією, технологічними процесами. Окремо або разом зі збіркою щита. Київ та вся Україна.";
+
+const faqItems = [
+  { q: "Що робити, якщо готової схеми немає?", a: "Надішліть опис задачі — які споживачі, яке навантаження, які режими роботи. Розробимо принципову схему самостійно та узгодимо з вами перед початком виготовлення." },
+  { q: "Чи можна замовити тільки програму без щита?", a: "Так. Якщо контролер вже встановлений або щит збирає інша організація — розробляємо та завантажуємо програму окремо. Для цього потрібні паспортні дані контролера і технічне завдання на алгоритм роботи." },
+  { q: "Які задачі ви беретеся автоматизувати?", a: "Беремося за задачі малої та середньої складності — автоматизація окремого процесу, цеху або невеликої виробничої лінії. Наприклад: керування групою двигунів і клапанів за заданим сценарієм, автоматизація насосної станції, вентиляції або протипожежної системи." },
+  { q: "Як описати задачу, якщо я не знаю що мені потрібно?", a: "Опишіть що повинна робити система — словами, без технічних деталей. Що вмикається, що вимикається, за якою умовою, що має відбутися в аварійній ситуації. Цього достатньо, щоб ми могли оцінити задачу і запропонувати рішення." },
+  { q: "Чи потрібен ПЛК, чи достатньо релейної схеми?", a: "Залежить від задачі. Якщо сигналів і вузлів небагато — реалізуємо на релейно-контакторній схемі: це надійно і дешевше. Якщо логіка складна або вузлів багато — інтегруємо ПЛК і розробляємо програму під задачу. Завжди вибираємо рішення виходячи з доцільності." },
+  { q: "Яку документацію ви передаєте разом зі щитом?", a: "Паспорт виробу та принципову схему. Документи вкладаються безпосередньо у щит." },
+  { q: "Чи можна надати свої компоненти для збірки?", a: "Ні. Ми самостійно закуповуємо все обладнання відповідно до узгодженої специфікації і передаємо замовнику готовий виріб з гарантією. Це дозволяє нам відповідати за якість щита від початку до кінця." },
+];
+---
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href="https://elektromontazh.kiev.ua/posluhy-ta-produktsiia/plk" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/em-hrshch.css" />
+</head>
+<body>
+
+<Header activePage="posluhy" />
+
+<Breadcrumbs current="Програмування ПЛК" />
+
+<!-- HERO — зелений -->
+<div class="em-hero-product">
+  <div class="em-hero-product-inner">
+    <div class="em-hero-product-text">
+      <h1>Програмування ПЛК на замовлення</h1>
+      <p class="em-hero-product-lead">Розробляємо програми для логічних контролерів під конкретне технічне завдання. Керування двигунами, насосами, вентиляцією, технологічними процесами — від простої послідовності пуску до алгоритмів керування кількома вузлами. Окремо або разом зі збіркою щита. Київ, Київська область та вся Україна.</p>
+      <div class="em-hero-badges">
+        <div class="em-badge"><strong>ПЛК + щит</strong> або тільки програма</div>
+        <div class="em-badge"><strong>від 1 тижня</strong> — розробка</div>
+        <div class="em-badge"><strong>12 міс.</strong> — гарантія</div>
+        <div class="em-badge"><strong>25 років</strong> — досвід</div>
+      </div>
+      <div class="em-hero-product-actions">
+        <a href="#kontakty-blok" class="em-btn-primary">Замовити / Зв'язатися з нами</a>
+      </div>
+      <p class="em-hero-product-contact">Або зателефонуйте: <a href="tel:+380675097094">+38 (067) 509-70-94</a></p>
+    </div>
+    <div class="em-hero-collage">
+      <div class="em-hero-collage-item">
+        <img src="/images/plk/plk-oven-flexi-s2-a1-releini-moduli-kyiv-2026-06-c1.jpg"
+             alt="Щит керування з ПЛК ОВЕН Flexi S2-A1 та реле ETI — загальний вигляд монтажу" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/plk/plk-schneider-zelio-sr3-krupno-kyiv-2026-06-c2.jpg"
+             alt="Контролер Schneider Electric Zelio SR3 B261BD — кліщовий монтаж на DIN-рейці" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/plk/plk-oven-pr100-schebt-releini-moduli-kyiv-2026-06-c3.jpg"
+             alt="ПЛК ОВЕН ПР100 зі з'єднувальним блоком ETI та групою реле — щит керування" loading="lazy" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/plk/plk-aqteck-pr200-schyt-compact-kyiv-2026-06-c4.jpg"
+             alt="Щит керування з ПЛК AQteck ПР200 — компактне виконання, живлення Mean Well" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ГАЛЕРЕЯ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Наші роботи</span>
+  <h2>Щити з ПЛК — фото з нашого виробництва</h2>
+  <div class="em-product-gallery">
+    <div class="em-gallery-item em-gallery-item-large"
+         data-caption="Великий щит керування з ПЛК ОВЕН та блоком реле — загальний вигляд відчиненого щита"
+         data-full="/images/plk/plk-schyt-oven-velykyi-releini-blok-kyiv-2026-06-01.jpg">
+      <img src="/images/plk/plk-schyt-oven-velykyi-releini-blok-kyiv-2026-06-01.jpg"
+           alt="Великий щит керування з ПЛК ОВЕН та блоком реле" width="675" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит з Eaton Easy та мягкими пускачами WEG SSW-07 — керування групою двигунів"
+         data-full="/images/plk/plk-eaton-easy-schyt-keruvannia-kyiv-2026-06-02.jpg">
+      <img src="/images/plk/plk-eaton-easy-schyt-keruvannia-kyiv-2026-06-02.jpg"
+           alt="Щит керування з контролером Eaton Easy — автомати ETI, мягкі пускачі WEG SSW-07" width="897" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="ОВЕН Flexi S2-A1 крупним планом — підключені клеми, маркування входів та виходів"
+         data-full="/images/plk/plk-oven-flexi-s2-a1-krupno-kyiv-2026-06-03.jpg">
+      <img src="/images/plk/plk-oven-flexi-s2-a1-krupno-kyiv-2026-06-03.jpg"
+           alt="ПЛК ОВЕН Flexi S2-A1 крупним планом — підключені входи виходи, маркування" width="897" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="ОВЕН ПР100 — індикатори стану DI, AI, DO в режимі роботи програми"
+         data-full="/images/plk/plk-oven-pr100-robota-indykatory-kyiv-2026-06-04.jpg">
+      <img src="/images/plk/plk-oven-pr100-robota-indykatory-kyiv-2026-06-04.jpg"
+           alt="ПЛК ОВЕН ПР100 крупно — індикатори DI AI DO в режимі роботи" width="897" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Schneider Electric Zelio Logic у щиті: реле ETI, акуратне маркування клем"
+         data-full="/images/plk/plk-schneider-zelio-schyt-krupno-kyiv-2026-06-05.jpg">
+      <img src="/images/plk/plk-schneider-zelio-schyt-krupno-kyiv-2026-06-05.jpg"
+           alt="Schneider Electric Zelio Logic у щиті — реле ETI, клеми, маркування" width="1200" height="897" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит з Zelio та контакторами ETI — чотири ряди DIN-рейок, акуратний монтаж"
+         data-full="/images/plk/plk-schyt-zelio-kontaktory-lytseva-kyiv-2026-06-06.jpg">
+      <img src="/images/plk/plk-schyt-zelio-kontaktory-lytseva-kyiv-2026-06-06.jpg"
+           alt="Щит керування з Zelio та контакторами ETI — лицева панель з індикацією" width="758" height="1200" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Лицева панель щита ШУНК з підписаними кнопками — ручний та автоматичний режими"
+         data-full="/images/plk/plk-litseva-panel-shchyt-shuhnk-kyiv-2026-06-07.jpg">
+      <img src="/images/plk/plk-litseva-panel-shchyt-shuhnk-kyiv-2026-06-07.jpg"
+           alt="Лицева панель щита керування — кнопки пуску зупинки з підписами програм" width="733" height="1062" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит з чотирма мягкими пускачами WEG SSW-07 та автоматами ETI — керування двигунами"
+         data-full="/images/plk/plk-schyt-m-puskateli-soft-starter-kyiv-2026-06-08.jpg">
+      <img src="/images/plk/plk-schyt-m-puskateli-soft-starter-kyiv-2026-06-08.jpg"
+           alt="Щит керування двигунами — чотири мягкі пускачі WEG та автомати ETI" width="1200" height="897" loading="lazy" />
+    </div>
+  </div>
+  <div class="em-gallery-cta">
+    <a href="/vykonani-roboty/" class="em-btn-primary">Переглянути роботи →</a>
+  </div>
+</section>
+
+<!-- ЩО ПРОГРАМУЄМО — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Напрямки</span>
+    <h2>Що програмуємо</h2>
+    <p class="em-lead">Беремося за задачі малої та середньої складності: автоматизацію окремого процесу, цеху, невеликої виробничої лінії. Не автоматизуємо великі заводські комплекси — працюємо там, де потрібне точне і надійне рішення під конкретну задачу.</p>
+    <div class="em-objects-grid">
+      <div class="em-object-card"><div class="em-object-num">01</div><h3>Керування електродвигунами</h3><p>Прямий пуск, реверс, зірка-трикутник, почергові запуски за сценарієм.</p></div>
+      <div class="em-object-card"><div class="em-object-num">02</div><h3>Насосні станції</h3><p>Керування по рівню або тиску, черговість насосів, захисти.</p></div>
+      <div class="em-object-card"><div class="em-object-num">03</div><h3>Вентиляція та кліматика</h3><p>Пуск/зупинка за датчиком, блокування, аварійна сигналізація.</p></div>
+      <div class="em-object-card"><div class="em-object-num">04</div><h3>Протипожежна автоматика</h3><p>Димовидалення, підпір повітря, керування клапанами та приводами.</p></div>
+      <div class="em-object-card"><div class="em-object-num">05</div><h3>Технологічні процеси</h3><p>Керування клапанами, двигунами та виконавчими механізмами за заданим сценарієм.</p></div>
+      <div class="em-object-card"><div class="em-object-num">06</div><h3>Агровиробництво</h3><p>Автоматизація вентиляції, годівлі, поливу на фермах і тепличних господарствах.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- З ЯКИМИ КОНТРОЛЕРАМИ — білий -->
+<section class="em-section">
+  <span class="em-section-label">Контролери</span>
+  <h2>З якими контролерами працюємо</h2>
+  <table class="em-specs-table">
+    <tbody>
+      <tr><td class="em-specs-label">Siemens LOGO!</td><td class="em-specs-value">Компактні задачі: керування 1–3 вузлами, прості алгоритми, таймери, лічильники</td></tr>
+      <tr><td class="em-specs-label">Schneider Electric Zelio Logic</td><td class="em-specs-value">Аналог LOGO! — застосовуємо залежно від наявності та побажань замовника</td></tr>
+      <tr><td class="em-specs-label">Eaton Easy (Easy-E4)</td><td class="em-specs-value">Компактні рішення для невеликих установок</td></tr>
+      <tr><td class="em-specs-label">ОВЕН</td><td class="em-specs-value">Вітчизняний виробник, широко застосовується на українських підприємствах</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:16px; color:var(--c-muted); font-family:var(--ff-body); font-size:14px;">Якщо у вас інший контролер — уточніть при подачі ТЗ, розглянемо індивідуально.</p>
+</section>
+
+<!-- ОКРЕМО АБО ЗІ ЩИТОМ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Формати роботи</span>
+    <h2>Окремо або разом зі щитом</h2>
+    <div class="em-why-grid">
+      <div class="em-why-card">
+        <div class="em-why-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+        </div>
+        <h3>Щит + програма під ключ</h3>
+        <p>Збираємо щит керування з встановленим контролером і розробляємо програму під ваше технічне завдання. Тестуємо все разом перед передачею. Одна відповідальна сторона від початку до кінця.</p>
+      </div>
+      <div class="em-why-card">
+        <div class="em-why-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        </div>
+        <h3>Тільки програма</h3>
+        <p>Якщо щит вже є або його збирає інша організація — розробляємо та завантажуємо програму окремо. Потрібні паспортні дані контролера і технічне завдання на алгоритм роботи.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ЯК МИ ПРАЦЮЄМО — білий -->
+<section class="em-section">
+  <span class="em-section-label">Як ми працюємо</span>
+  <h2>5 кроків від ТЗ до готового рішення</h2>
+  <div class="em-steps-row">
+    <div class="em-step"><div class="em-step-num">01</div><h3>Технічне завдання</h3><p>Надсилаєте опис задачі або схему. Приймаємо PDF, DWG, фото, усний опис — будь-який зручний формат.</p></div>
+    <div class="em-step"><div class="em-step-num">02</div><h3>Розробка алгоритму</h3><p>Розробляємо або перевіряємо алгоритм роботи, узгоджуємо вартість та строки. Відповідаємо за 1–2 дні.</p></div>
+    <div class="em-step"><div class="em-step-num">03</div><h3>Оплата</h3><p>Після оплати виріб або послуга ставиться у виконання.</p></div>
+    <div class="em-step"><div class="em-step-num">04</div><h3>Збірка та програмування</h3><p>Збираємо щит, встановлюємо контролер, пишемо та завантажуємо програму.</p></div>
+    <div class="em-step"><div class="em-step-num">05</div><h3>Тестування та передача</h3><p>Перевіряємо роботу програми перед передачею. Паспорт виробу та схема — у щиті.</p></div>
+  </div>
+</section>
+
+<!-- ПЕРЕВАГИ — зелений -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Переваги</span>
+    <h2>Чому замовляють у нас</h2>
+    <div class="em-why-grid">
+      <div class="em-why-card"><h3>Досвід з 1999 року</h3><p>25+ років виготовлення щитів та програмування контролерів для промислових та комерційних об'єктів.</p></div>
+      <div class="em-why-card"><h3>Розробляємо алгоритм за описом</h3><p>Не потрібна готова схема — опишіть задачу словами, ми розробимо алгоритм і узгодимо з вами перед початком.</p></div>
+      <div class="em-why-card"><h3>Робота за проєктною документацією</h3><p>Приймаємо схеми від будь-якої проєктної організації та програмуємо точно за ними.</p></div>
+      <div class="em-why-card"><h3>Тестування перед відправкою</h3><p>Кожна програма перевіряється до передачі замовнику. Паспорт виробу — з кожним щитом.</p></div>
+      <div class="em-why-card"><h3>Доставка по всій Україні</h3><p>По Києву та Київській обл. — власним транспортом. По Україні — Новою Поштою.</p></div>
+      <div class="em-why-card"><h3>Гарантія 12 місяців</h3><p>На кожен виготовлений щит та розроблену програму — письмове гарантійне зобов'язання.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ — білий -->
+<FaqAccordion items={faqItems} sectionTitle="Питання про програмування ПЛК" />
+
+<!-- КОНТАКТНИЙ БЛОК — зелений -->
+<ContactBlock title="Готові обговорити ваше замовлення — програмування ПЛК" />
+
+<!-- ТАКОЖ ВИГОТОВЛЯЄМО — білий -->
+<AlsoMake currentSlug="plk" />
+
+<Footer />
+<Lightbox />
+<script is:inline src="/js/em-site.js"></script>
+</body>
+</html>

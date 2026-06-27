@@ -1,14 +1,14 @@
-⏱️ *22:00:57*
+⏱️ *09:54:42*
 📸 *Инспекция фото:*
-• `public/images/ahro/ahro-dvirtsia-peremikachy-panel-keruvannia-kyiv-2026-06-08.jpg` — ok
-• `public/images/ahro/ahro-shchyt-perelyahy-vnutrishniy-montazh-kyiv-2026-06-c2.jpg` — ok
-• `public/images/ahro/ahro-kompaktnyy-shchyt-verstak-schneider-kyiv-2026-06-05.jpg` — ok
-• `public/images/ahro/ahro-panel-keruvannia-nasosy-aeratsiia-kyiv-2026-06-c4.jpg` — ok
-• `public/images/ahro/ahro-ventyliatsiia-hodivlia-panel-kyiv-2026-06-c1.jpg` — ok
-• `public/images/ahro/ahro-plk-adut-eti-kontaktory-markuvannia-kyiv-2026-06-07.jpg` — ok
-• `public/images/ahro/ahro-shchyt-schneider-zelio-delta-kyiv-2026-06-c3.jpg` — ok
-• `public/images/ahro/ahro-vnutrishniy-montazh-rubylnyk-100a-kyiv-2026-06-03.jpg` — ok
-• `public/images/ahro/ahro-plk-zelio-schneider-krupnyy-plan-kyiv-2026-06-06.jpg` — ok
-• `public/images/ahro/ahro-fasad-shafa-keruvannia-avariyni-kyiv-2026-06-04.jpg` — ok
-• `public/images/ahro/ahro-shchyt-zahalnyi-vyhlyad-vidkrytyy-kyiv-2026-06-01.jpg` — ok
-• `public/images/ahro/ahro-vnutrishniy-montazh-eti-kontaktory-kyiv-2026-06-02.jpg` — ok
+• `public/images/plk/plk-aqteck-pr200-schyt-compact-kyiv-2026-06-c4.jpg` — ok
+• `public/images/plk/plk-eaton-easy-schyt-keruvannia-kyiv-2026-06-02.jpg` — ok
+• `public/images/plk/plk-schneider-zelio-schyt-krupno-kyiv-2026-06-05.jpg` — ok
+• `public/images/plk/plk-litseva-panel-shchyt-shuhnk-kyiv-2026-06-07.jpg` — ok
+• `public/images/plk/plk-schyt-oven-velykyi-releini-blok-kyiv-2026-06-01.jpg` — ok
+• `public/images/plk/plk-oven-flexi-s2-a1-releini-moduli-kyiv-2026-06-c1.jpg` — ok
+• `public/images/plk/plk-oven-flexi-s2-a1-krupno-kyiv-2026-06-03.jpg` — ok
+• `public/images/plk/plk-schyt-m-puskateli-soft-starter-kyiv-2026-06-08.jpg` — ok
+• `public/images/plk/plk-oven-pr100-robota-indykatory-kyiv-2026-06-04.jpg` — ok
+• `public/images/plk/plk-schneider-zelio-sr3-krupno-kyiv-2026-06-c2.jpg` — ok
+• `public/images/plk/plk-oven-pr100-schebt-releini-moduli-kyiv-2026-06-c3.jpg` — ok
+• `public/images/plk/plk-schyt-zelio-kontaktory-lytseva-kyiv-2026-06-06.jpg` — ok
