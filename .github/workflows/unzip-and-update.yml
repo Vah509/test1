@@ -27,49 +27,82 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Unzip, Clean and Optimize Images via Sharp
+      - name: Unzip, Clean, Backup and Optimize Images
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
-          ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
+          # Файлы отчетов
+          REPORT_FILE="tg_image_report.txt"
+          DELETE_REPORT="tg_delete_report.txt"
+          touch $DELETE_REPORT
+          
+          ZIP_FILE=$(ls ai-updates/*.zip | grep -v "backup-rollback.zip" | head -n 1)
           if [ -f "$ZIP_FILE" ]; then
-            # 1. Сохраняем список только новых JPEG из архива во временный текстовый файл
+            # 1. Сохраняем первичный список картинок для Sharp
             unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg)$" | tr -d '\r' > unzip_list.txt || true
             
-            # 2. Распаковываем во временную папку
+            # 2. Рапаспаковываем архив во временную директорию
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
             
-            # 3. Удаление файлов по списку delete.txt
+            # 3. Выполняем удаление по списку ИИ (delete.txt), если он есть
             if [ -f "./temp_unzip/delete.txt" ]; then
+              echo -e "🗑️ **Удалено из проекта:**" > $DELETE_REPORT
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
                 if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
                   rm "$clean_path"
+                  echo "\`$clean_path\`" >> $DELETE_REPORT
                 fi
               done < ./temp_unzip/delete.txt
               rm ./temp_unzip/delete.txt
+              echo "" >> $DELETE_REPORT # Пустая строка-перевод для разделения блоков
             fi
             
-            # 4. Переносим все распакованные файлы на место в репозиторий
+            # 4. Переносим все распакованные файлы в репозиторий
             cp -rf ./temp_unzip/* ./
             rm -rf ./temp_unzip
+            
+            # 5. ФОРМИРУЕМ ФАЙЛ-ПРОТИВОЯДИЕ (БЭКАП ДЛЯ ОТКАТА)
+            ALL_ARCHIVE_FILES=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -v -E "(^$|^\.|.*/$)" | tr -d '\r' || true)
+            
+            BACKUP_DIR="./ai-updates/backups"
+            mkdir -p "$BACKUP_DIR"
+            rm -rf ./temp_backup && mkdir ./temp_backup
+            
+            # Проверяем физическое наличие каждого файла на диске (исключая удаленные файлы и сам delete.txt)
+            echo "$ALL_ARCHIVE_FILES" | while read -r f; do
+              f_clean=$(echo "$f" | xargs)
+              if [ -n "$f_clean" ] && [ "$f_clean" != "delete.txt" ] && [ -f "$f_clean" ]; then
+                echo "$f_clean" >> ./temp_backup/delete.txt
+              fi
+            done
+            
+            # Упаковываем этот деликатный delete.txt в архив отката
+            if [ -f "./temp_backup/delete.txt" ]; then
+              cd ./temp_backup
+              zip -r ../backup-rollback.zip delete.txt
+              cd ..
+              mv backup-rollback.zip "$BACKUP_DIR/backup-rollback.zip"
+            fi
+            rm -rf ./temp_backup
+            
+            # Теперь можно безопасно удалить исходный входящий zip-файл
             rm "$ZIP_FILE"
             
-            # 5. Устанавливаем sharp локально
+            # 6. Оптимизация новых изображений через Sharp
             npm install sharp --no-save
             
-            # 6. Запускаем Node.js скрипт (он берет список строго из файла unzip_list.txt)
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
             
             async function processImages() {
-              const reportFile = "tg_image_report.txt";
+              const reportFile = "'"$REPORT_FILE"'";
               const listFile = "unzip_list.txt";
               
-              fs.writeFileSync(reportFile, `⏱️ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n`);
+              fs.writeFileSync(reportFile, "📸 **Инспекция фото:**\n");
               
               if (!fs.existsSync(listFile)) {
                 fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
@@ -97,7 +130,7 @@ jobs:
                   const meta = await image.metadata();
                   
                   if (meta.width <= 1200) {
-                    fs.appendFileSync(reportFile, `• \`${file}\` — ok\n`);
+                    fs.appendFileSync(reportFile, `\`${file}\` — ok\n`);
                   } else {
                     const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
                     fs.writeFileSync(file, buffer);
@@ -105,10 +138,10 @@ jobs:
                     let newSizeKB = Math.round(buffer.length / 1024);
                     let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
                     
-                    fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} — ${newSizeStr} — опт.\n`);
+                    fs.appendFileSync(reportFile, `\`${file}\` — ${origSizeStr} — ${newSizeStr} — опт.\n`);
                   }
                 } catch (err) {
-                  fs.appendFileSync(reportFile, `• \`${file}\` — ошибка анализа\n`);
+                  fs.appendFileSync(reportFile, `\`${file}\` — ошибка анализа\n`);
                 }
               }
               
@@ -117,18 +150,30 @@ jobs:
             processImages();
             '
             
+            # Собираем финальный текст сообщения для Telegram (сначала удаленные, затем инспекция)
+            echo "⏱️ *$CURRENT_TIME*" > final_tg_msg.txt
+            echo "" >> final_tg_msg.txt
+            if [ -s "$DELETE_REPORT" ]; then
+              cat $DELETE_REPORT >> final_tg_msg.txt
+            fi
+            cat $REPORT_FILE >> final_tg_msg.txt
+            
             {
               echo 'IMAGE_REPORT<<EOF'
-              cat tg_image_report.txt
+              cat final_tg_msg.txt
               echo 'EOF'
             } >> $GITHUB_ENV
             
+            # Стираем временные файлы логов
+            rm -f $REPORT_FILE $DELETE_REPORT final_tg_msg.txt
+            
           else
-            echo "Архив не найден."
-            exit 1
+            echo "Архив обновлений не найден или это системный бэкап."
+            exit 0
           fi
 
       - name: Send Image Inspection Report
+        if: success() && env.IMAGE_REPORT != ''
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -149,7 +194,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "Изменений нет."
           else
-            git commit -m "🤖 Авто-обновление сайта (Проверка успешна)"
+            git commit -m "🤖 Авто-обновление сайта и создание точки отката"
             git push origin ${{ github.ref_name }}
           fi
 
@@ -168,7 +213,7 @@ jobs:
           format: markdown
           message: |
             ⏱️ *${{ env.FINAL_TIME }}*
-            🟢 Проект успешно обновлен
+            🟢 Проект успешно обновлен. Точка отката сохранена в /backups/
 
       - name: Send Failure Telegram Message
         if: failure()
@@ -179,4 +224,4 @@ jobs:
           format: markdown
           message: |
             ⏱️ *${{ env.FINAL_TIME }}*
-            🔴 Ошибка обновления
+            🔴 Ошибка обновления (Astro Build упал)
