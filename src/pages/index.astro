@@ -1,0 +1,243 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import AlsoMake from '../components/AlsoMake.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+import Lightbox from '../components/Lightbox.astro';
+
+const title = "Виготовлення електрощитів на замовлення — Київ та область | elektromontazh.kiev.ua";
+const description = "Виготовлення силових щитів та щитів керування будь-якої складності. Гарантія 12 міс. Терміни від 2 тижнів. Київ, Київська область та вся Україна.";
+
+const faqItems = [
+  { q: "Які типи щитів ви виготовляєте?", a: "Силові щити (ГРЩ, ВРЩ) до 630А, щити керування двигунами (прямий пуск, реверс, зірка-трикутник, ЧП, м'який пуск), щити димовидалення та підпору повітря, щити керування засувками (ШУЗ), конденсаторні установки (КРМ), щити керування зенітними ліхтарями, електрощити для агрогосподарств." },
+  { q: "Чи можете ви працювати за нашою схемою?", a: "Так, приймаємо схеми у будь-якому форматі — PDF, DWG, фото креслення, або усний опис задачі. Якщо схеми немає — розробляємо самостійно та узгоджуємо з замовником перед виготовленням." },
+  { q: "Який термін виготовлення?", a: "Від 2 тижнів. Точний термін залежить від складності схеми, комплектації та поточного завантаження виробництва. Узгоджується при постановці у виготовлення." },
+  { q: "Яка гарантія на щити?", a: "12 місяців на кожен виготовлений щит. Гарантійне зобов'язання передається разом з паспортом виробу." },
+  { q: "Як розрахувати вартість?", a: "Надішліть технічне завдання або схему — розрахуємо вартість протягом 1–2 робочих днів. Вартість залежить від складності схеми, кількості елементів та обраних брендів компонентів." },
+  { q: "Чи доставляєте по всій Україні?", a: "Так. По Києву та Київській області — власним транспортом. По Україні — Новою Поштою." },
+  { q: "З якими брендами компонентів ви працюєте?", a: "Основні: ETI, Hager, Schneider Electric, Eaton. Економ-комплектація: E-Next, Asko, Chint. Конкретний бренд підбирається під бюджет та узгоджується при замовленні." },
+];
+---
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href="https://elektromontazh.kiev.ua/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/em-hrshch.css" />
+  <link rel="stylesheet" href="/css/em-home.css" />
+</head>
+<body>
+
+<Header activePage="" />
+
+<!-- HERO -->
+<div class="em-hero-product">
+  <div class="em-hero-product-inner">
+    <div class="em-hero-product-text">
+      <span class="em-hero-tag">Виробництво · Київ та область</span>
+      <h1>Виготовлення електрощитів на замовлення</h1>
+      <p class="em-hero-product-lead">Силові щити та щити керування будь-якої складності. Працюємо за вашими схемами або розробляємо з нуля. Київ, Київська область та вся Україна.</p>
+      <div class="em-hero-badges">
+        <div class="em-badge"><strong>від 2 тижнів</strong> — виготовлення</div>
+        <div class="em-badge"><strong>12 міс.</strong> — гарантія</div>
+        <div class="em-badge"><strong>25 років</strong> — досвід</div>
+        <div class="em-badge"><strong>500+</strong> — проектів виконано</div>
+      </div>
+      <div class="em-hero-product-actions">
+        <a href="#kontakty-blok" class="em-btn-primary">Замовити / Зв'язатися з нами</a>
+      </div>
+      <p class="em-hero-product-contact">Або зателефонуйте: <a href="tel:+380675097094">+38 (067) 509-70-94</a></p>
+    </div>
+    <div class="em-hero-collage">
+      <div class="em-hero-collage-item">
+        <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-c1.jpg"
+             alt="Щит керування двигунами — частотні перетворювачі, монтаж" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-c2.jpg"
+             alt="КРМ — конденсаторна установка компенсації реактивної потужності" loading="eager" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-c3.jpg"
+             alt="Великий щит керування — відкритий, внутрішній монтаж" loading="lazy" />
+      </div>
+      <div class="em-hero-collage-item">
+        <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-c4.jpg"
+             alt="Щит керування засувками ШУЗ — фасад готового виробу" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ГАЛЕРЕЯ НАШИХ РОБІТ -->
+<section class="em-section">
+  <span class="em-section-label">Наші роботи</span>
+  <h2>Реальні щити з нашого виробництва</h2>
+  <div class="em-product-gallery em-home-gallery">
+    <div class="em-gallery-item"
+         data-caption="Щит керування засувками ШУЗ — фасад з кнопками керування"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-01.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-01.jpg"
+           alt="Щит керування засувками ШУЗ — фасад з кнопками керування" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит ШУЗ — внутрішній монтаж, контактори ETI"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-02.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-02.jpg"
+           alt="Щит ШУЗ — внутрішній монтаж, контактори ETI" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит зовнішнього освітлення ЩЗО — фасад готового виробу"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-03.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-03.jpg"
+           alt="Щит зовнішнього освітлення ЩЗО — фасад готового виробу" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит керування — внутрішній монтаж, клемні колодки"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-04.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-04.jpg"
+           alt="Щит керування — внутрішній монтаж, клемні колодки" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит керування вентиляцією — монтаж автоматів та контакторів"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-05.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-05.jpg"
+           alt="Щит керування вентиляцією — монтаж автоматів та контакторів" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит керування насосами — готовий виріб"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-06.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-06.jpg"
+           alt="Щит керування насосами — готовий виріб" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит керування — блок Schneider Electric, монтаж"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-07.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-07.jpg"
+           alt="Щит керування — блок Schneider Electric, монтаж" loading="lazy" />
+    </div>
+    <div class="em-gallery-item"
+         data-caption="Щит керування — деталь монтажу, маркування"
+         data-full="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-08.jpg">
+      <img src="/images/home/home-vyrobnytstvo-elektroshchytiv-kyiv-2026-06-08.jpg"
+           alt="Щит керування — деталь монтажу, маркування" loading="lazy" />
+    </div>
+  </div>
+  <div class="em-gallery-cta">
+    <a href="/vykonani-roboty/" class="em-btn-outline">Переглянути всі роботи →</a>
+  </div>
+</section>
+
+<!-- ЩО МИ ВИГОТОВЛЯЄМО -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Продукція та послуги</span>
+    <h2>Що ми виготовляємо</h2>
+    <div class="em-products-grid em-products-grid-home">
+      <a href="/posluhy-ta-produktsiia/hrshch" class="em-product-card">
+        <div class="em-product-card-body"><h3>ГРЩ / ВРЩ — силові щити</h3><p>До 630А, одно- та багатовводні</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/dymovydalennia" class="em-product-card">
+        <div class="em-product-card-body"><h3>Щити димовидалення</h3><p>Димовидалення, підпір повітря, клапани</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/dvyhuny" class="em-product-card">
+        <div class="em-product-card-body"><h3>Щити керування двигунами</h3><p>DOL, реверс, зірка-трикутник, ЧП, софтстартер</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/shuz" class="em-product-card">
+        <div class="em-product-card-body"><h3>Щити керування засувками (ШУЗ)</h3><p>Трубопровідні системи, електроприводна арматура</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/krm" class="em-product-card">
+        <div class="em-product-card-body"><h3>КРМ — компенсація реактивної потужності</h3><p>Конденсаторні установки з авторегулятором</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/zenitni-lihtari" class="em-product-card">
+        <div class="em-product-card-body"><h3>Щити керування зенітними ліхтарями</h3><p>Фрамуги, люки, протипожежна автоматика</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/ahro" class="em-product-card">
+        <div class="em-product-card-body"><h3>Електрощити для агрогосподарств</h3><p>Вентиляція, аерація, кормові системи</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/plk" class="em-product-card">
+        <div class="em-product-card-body"><h3>Програмування ПЛК</h3><p>Siemens LOGO!, Schneider Zelio, ОВЕН</p></div>
+      </a>
+      <a href="/posluhy-ta-produktsiia/elektromontazh" class="em-product-card">
+        <div class="em-product-card-body"><h3>Електромонтажні роботи</h3><p>Монтаж, підключення, пусконаладка</p></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ПЕРЕВАГИ -->
+<section class="em-section">
+  <span class="em-section-label">Переваги</span>
+  <h2>Чому замовляють у нас</h2>
+  <div class="em-why-grid">
+    <div class="em-why-card"><h3>Досвід з 1999 року</h3><p>25+ років виготовлення щитів для промислових та комерційних об'єктів.</p></div>
+    <div class="em-why-card"><h3>Робота за проєктною документацією</h3><p>Приймаємо схеми від будь-якої проєктної організації та збираємо точно за ними.</p></div>
+    <div class="em-why-card"><h3>Розробляємо схеми самостійно</h3><p>Якщо проєкту ще немає — розробимо схему керування за описом задачі.</p></div>
+    <div class="em-why-card"><h3>Тестування перед відправкою</h3><p>Кожен щит перевіряється до передачі замовнику. Паспорт виробу — з кожним щитом.</p></div>
+    <div class="em-why-card"><h3>Доставка по всій Україні</h3><p>По Києву та Київській обл. — власним транспортом. По Україні — Новою Поштою.</p></div>
+    <div class="em-why-card"><h3>Гарантія 12 місяців</h3><p>На кожен виготовлений щит — письмове гарантійне зобов'язання.</p></div>
+  </div>
+</section>
+
+<!-- КОМПОНЕНТИ -->
+<div class="em-section-alt">
+  <div class="em-section-alt-inner">
+    <span class="em-section-label">Компоненти</span>
+    <h2>Компоненти та виробники</h2>
+    <p class="em-lead">Підбираємо під бюджет та наявність. Конкретний бренд узгоджується при прийомі замовлення.</p>
+    <div class="em-brands">
+      <div class="em-brands-group">
+        <div class="em-brands-group-label">Основні бренди</div>
+        <div class="em-brands-row">
+          <div class="em-brand-pill">ETI</div>
+          <div class="em-brand-pill">Hager</div>
+          <div class="em-brand-pill">Schneider Electric</div>
+          <div class="em-brand-pill">Eaton</div>
+        </div>
+      </div>
+      <div class="em-brands-group">
+        <div class="em-brands-group-label">Економ-комплектація</div>
+        <div class="em-brands-row">
+          <div class="em-brand-pill secondary">E-Next</div>
+          <div class="em-brand-pill secondary">Asko</div>
+          <div class="em-brand-pill secondary">Chint</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ЯК МИ ПРАЦЮЄМО -->
+<section class="em-section">
+  <span class="em-section-label">Як ми працюємо</span>
+  <h2>5 кроків від ТЗ до готового щита</h2>
+  <div class="em-steps-row">
+    <div class="em-step"><div class="em-step-num">01</div><h3>Технічне завдання</h3><p>Надсилаєте ТЗ, схему або описуєте задачу. Приймаємо PDF, DWG, фото, усний опис.</p></div>
+    <div class="em-step"><div class="em-step-num">02</div><h3>Розрахунок та схема</h3><p>Розробляємо або перевіряємо схему, узгоджуємо вартість та строки. Відповідаємо за 1–2 дні.</p></div>
+    <div class="em-step"><div class="em-step-num">03</div><h3>Оплата</h3><p>Часткова або повна — після цього запускаємо щит у виробництво.</p></div>
+    <div class="em-step"><div class="em-step-num">04</div><h3>Збірка та перевірка</h3><p>Збираємо у Києві. Маркуємо, перевіряємо кожен щит перед відправкою.</p></div>
+    <div class="em-step"><div class="em-step-num">05</div><h3>Передача з документацією</h3><p>Доставка по Києву та Київській обл. або Нова Пошта. Паспорт виробу та схема — у щиті.</p></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<FaqAccordion items={faqItems} sectionTitle="Питання про виготовлення електрощитів" />
+
+<!-- КОНТАКТНИЙ БЛОК -->
+<ContactBlock title="Готові обговорити ваше замовлення" />
+
+<!-- ФУТЕР -->
+<Footer />
+
+<Lightbox />
+<script is:inline src="/js/em-site.js"></script>
+</body>
+</html>
