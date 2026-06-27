@@ -29,14 +29,15 @@ jobs:
 
       - name: Process Update or Rollback
         id: process_step
-        env:
-          ENV_REPO_NAME: ${{ github.event.repository.name }}
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
+          # Надежное определение имени репозитория без имени автора
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          
           FINAL_LOG="tg_final_report.txt"
-          echo "📦 **Репозиторий:** \`$ENV_REPO_NAME\`" > $FINAL_LOG
+          echo "📦 **Репозиторий:** \`$REPO_NAME\`" > $FINAL_LOG
           echo "⏱️ **Время:** *$CURRENT_TIME*" >> $FINAL_LOG
           
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
@@ -77,13 +78,11 @@ jobs:
           # СЦЕНАРИЙ 2: ОБЫЧНОЕ ОБНОВЛЕНИЕ
           # =========================================================================
           else
-            echo "⚡ **Что делали:** Обновление проекта и проверка фото" >> $FINAL_LOG
+            echo "⚡ **Что делали:** Обновление проекта и проверка photo" >> $FINAL_LOG
             echo "" >> $FINAL_LOG
             
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
-            
-            find ./temp_unzip -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \) | sed 's|./temp_unzip/||' > unzip_list.txt || true
             
             if [ -f "./temp_unzip/delete.txt" ]; then
               echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
@@ -98,10 +97,10 @@ jobs:
               echo "" >> $FINAL_LOG
             fi
             
+            # Переносим новые файлы в корень проекта
             if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
               cp -rf ./temp_unzip/* ./
             fi
-            rm -rf ./temp_unzip
             
             # Создание бэкапа-противоядия
             ALL_ARCHIVE_FILES=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -v -E "(^$|^\.|.*/$)" | tr -d '\r' || true)
@@ -123,136 +122,15 @@ jobs:
               BACKUP_CREATED="true"
             fi
             
-            # Входящий архив удаляем СРАЗУ, чтобы виртуалка была чистой
+            # Входящий zip удаляем немедленно, чтобы очистить git-репозиторий
             rm -rf ./temp_backup "$ZIP_FILE"
             
             npm install sharp --no-save
             
-            # Стабильный Node.js с жестким контролем асинхронности
+            # Контролируемый Node.js процесс для сбора путей и оптимизации фото
             node -e '
             const fs = require("fs");
+            const path = require("path");
             const sharp = require("sharp");
             
-            async function run() {
-              const logFile = "tg_final_report.txt";
-              const listFile = "unzip_list.txt";
-              
-              fs.appendFileSync(logFile, "📸 **Проверка фото:**\n");
-              
-              if (!fs.existsSync(listFile)) {
-                fs.appendFileSync(logFile, "Новых изображений в архиве нет.\n\n");
-                return;
-              }
-              
-              const files = fs.readFileSync(listFile, "utf8").split("\n").map(s => s.trim()).filter(Boolean);
-              if (files.length === 0) {
-                fs.appendFileSync(logFile, "Новых изображений в архиве нет.\n\n");
-                return;
-              }
-              
-              for (const f of files) {
-                if (!fs.existsSync(f)) continue;
-                try {
-                  const stat = fs.statSync(f);
-                  let oldSize = Math.round(stat.size / 1024) + " KB";
-                  const img = sharp(f);
-                  const meta = await img.metadata();
-                  
-                  if (meta.width <= 1200) {
-                    fs.appendFileSync(logFile, "`" + f + "` — " + oldSize + " — ОК\n");
-                  } else {
-                    const buf = await img.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
-                    fs.writeFileSync(f, buf);
-                    let newSize = Math.round(buf.length / 1024) + " KB";
-                    fs.appendFileSync(logFile, "`" + f + "` — " + oldSize + " -> " + newSize + " — ОПТ\n");
-                  }
-                } catch (e) {
-                  fs.appendFileSync(logFile, "`" + f + "` — ошибка анализа\n");
-                }
-              }
-              fs.appendFileSync(logFile, "\n");
-              if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
-            }
-            run().catch(err => {
-              fs.appendFileSync("tg_final_report.txt", "🔴 Ошибка скрипта оптимизации изображений\n");
-              process.exit(1);
-            });
-            '
-            
-            if [ "$BACKUP_CREATED" = "true" ]; then
-              echo "💾 **Бэкап создан.**" >> $FINAL_LOG
-              echo "" >> $FINAL_LOG
-            fi
-            
-            echo "IS_ROLLBACK=false" >> $GITHUB_ENV
-          fi
-          
-          {
-            echo 'TG_REPORT_BODY<<EOF'
-            cat $FINAL_LOG
-            echo 'EOF'
-          } >> $GITHUB_ENV
-          rm -f $FINAL_LOG
-
-      # Тестируем сборку Astro (Только для обновлений)
-      - name: Install dependencies & Test Astro Build
-        if: success() && env.IS_ROLLBACK == 'false'
-        id: astro_build
-        run: |
-          npm install
-          npm run build
-
-      # Формирование финального статуса при успехе
-      - name: Compile Success Report
-        if: success()
-        run: |
-          echo "IMAGE_REPORT<<EOF" > report_env.txt
-          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
-          if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
-            echo "🟢 **Обновление успешно (Astro Build развернут)**" >> report_env.txt
-          fi
-          echo "EOF" >> report_env.txt
-          cat report_env.txt >> $GITHUB_ENV
-          rm report_env.txt
-
-      # Формирование финального статуса при ошибке
-      - name: Compile Failure Report
-        if: failure()
-        run: |
-          echo "IMAGE_REPORT<<EOF" > report_env.txt
-          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
-          if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
-            echo "🔴 **Ошибка обновления (Astro Build упал)**" >> report_env.txt
-          else
-            echo "🔴 **Ошибка при выполнении операции отката**" >> report_env.txt
-          fi
-          echo "EOF" >> report_env.txt
-          cat report_env.txt >> $GITHUB_ENV
-          rm report_env.txt
-
-      # Сохраняем изменения в гит (Только если ВСЁ прошло успешно!)
-      - name: Commit and Push changes
-        if: success()
-        run: |
-          git add .
-          if git diff --staged --quiet; then
-            echo "Изменений нет."
-          else
-            if [ "${{ env.IS_ROLLBACK }}" = "true" ]; then
-              git commit -m "🚨 Авто-откат: репозиторий успешно очищен от файлов"
-            else
-              git commit -m "🤖 Авто-обновление сайта и создание точки отката"
-            fi
-            git push origin ${{ github.ref_name }}
-          fi
-
-      # Единая отправка сообщения в Telegram в любом случае
-      - name: Send Final Telegram Notification
-        if: always() && env.IMAGE_REPORT != ''
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: |
-            ${{ env.IMAGE_REPORT }}
+            function getImages
