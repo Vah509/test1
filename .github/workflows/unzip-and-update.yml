@@ -27,18 +27,19 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Process Archive (Update or Rollback)
+      - name: Process Update or Rollback
+        id: process_step
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
+          REPO_NAME="${{ github.event.repository.name }}"
           
-          REPORT_FILE="tg_image_report.txt"
-          DELETE_REPORT="tg_delete_report.txt"
-          touch $DELETE_REPORT
+          # Файлы для накопления лога
+          FINAL_LOG="tg_final_report.txt"
+          echo "📦 **Репозиторий:** \`$REPO_NAME\`" > $FINAL_LOG
+          echo "⏱️ **Время:** *$CURRENT_TIME*" >> $FINAL_LOG
           
-          # Ищем любой zip в папке ai-updates
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
-          
           if [ ! -f "$ZIP_FILE" ]; then
             echo "Архив не найден."
             exit 0
@@ -47,74 +48,64 @@ jobs:
           ZIP_NAME=$(basename "$ZIP_FILE")
           
           # =========================================================================
-          # СЦЕНАРИЙ 1: ЭТО ФАЙЛ ОТКАТА (backup-rollback.zip)
+          # СЦЕНАРИЙ 1: ОТКАТ ПО БЭКАПУ (backup-rollback.zip)
           # =========================================================================
           if [ "$ZIP_NAME" = "backup-rollback.zip" ]; then
-            echo "🚨 Обнаружен запрос на ОТКАТ изменений!"
+            echo "⚡ **Что делали:** Откат по бэкапу" >> $FINAL_LOG
+            echo "" >> $FINAL_LOG
             
             mkdir ./temp_rollback
             unzip -o "$ZIP_FILE" -d ./temp_rollback
             
             if [ -f "./temp_rollback/delete.txt" ]; then
-              echo -e "🚨 **Выполнен откат изменений. Удалено из проекта:**" > $DELETE_REPORT
+              echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
                 if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
                   rm "$clean_path"
-                  echo "\`$clean_path\`" >> $DELETE_REPORT
+                  echo "\`$clean_path\`" >> $FINAL_LOG
                 fi
               done < ./temp_rollback/delete.txt
-            else
-              echo "Файл delete.txt в архиве отката не найден." >> $DELETE_REPORT
+              echo "" >> $FINAL_LOG
             fi
             
             rm -rf ./temp_rollback "$ZIP_FILE"
-            
-            # Формируем сообщение для Telegram об откате
-            echo "⏱️ *$CURRENT_TIME*" > final_tg_msg.txt
-            echo "" >> final_tg_msg.txt
-            cat $DELETE_REPORT >> final_tg_msg.txt
-            
-            {
-              echo 'IMAGE_REPORT<<EOF'
-              cat final_tg_msg.txt
-              echo 'EOF'
-              echo 'IS_ROLLBACK=true'
-            } >> $GITHUB_ENV
-            
-            rm -f $DELETE_REPORT final_tg_msg.txt
+            echo "🟢 **Откат успешно выполнен.**" >> $FINAL_LOG
+            echo "IS_ROLLBACK=true" >> $GITHUB_ENV
             
           # =========================================================================
-          # СЦЕНАРИЙ 2: ЭТО ОБЫЧНОЕ ОБНОВЛЕНИЕ ОТ ИИ
+          # СЦЕНАРИЙ 2: ОБЫЧНОЕ ОБНОВЛЕНИЕ
           # =========================================================================
           else
-            echo "📦 Обнаружено обычное обновление сайта."
+            echo "⚡ **Что делали:** Обновление проекта и проверка фото" >> $FINAL_LOG
+            echo "" >> $FINAL_LOG
             
             unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg)$" | tr -d '\r' > unzip_list.txt || true
             
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
             
+            # Удаление файлов по запросу ИИ
             if [ -f "./temp_unzip/delete.txt" ]; then
-              echo -e "🗑️ **Удалено из проекта (запрос ИИ):**" > $DELETE_REPORT
+              echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
                 if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
                   rm "$clean_path"
-                  echo "\`$clean_path\`" >> $DELETE_REPORT
+                  echo "\`$clean_path\`" >> $FINAL_LOG
                 fi
               done < ./temp_unzip/delete.txt
               rm ./temp_unzip/delete.txt
-              echo "" >> $DELETE_REPORT
+              echo "" >> $FINAL_LOG
             fi
             
-            # Безопасное копирование: если в архиве есть файлы, переносим
+            # Накатываем новые файлы
             if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
               cp -rf ./temp_unzip/* ./
             fi
             rm -rf ./temp_unzip
             
-            # ФОРМИРУЕМ НОВЫЙ БЭКАП-ПРОТИВОЯДИЕ
+            # Создаем бэкап-противоядие
             ALL_ARCHIVE_FILES=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -v -E "(^$|^\.|.*/$)" | tr -d '\r' || true)
             BACKUP_DIR="./ai-updates/backups"
             mkdir -p "$BACKUP_DIR"
@@ -127,92 +118,121 @@ jobs:
               fi
             done
             
+            BACKUP_CREATED="false"
             if [ -f "./temp_backup/delete.txt" ]; then
               cd ./temp_backup && zip -r ../backup-rollback.zip delete.txt && cd ..
               mv backup-rollback.zip "$BACKUP_DIR/backup-rollback.zip"
+              BACKUP_CREATED="true"
             fi
             rm -rf ./temp_backup "$ZIP_FILE"
             
-            # Оптимизация картинок через Sharp
+            # Проверка и оптимизация фото через Sharp
             npm install sharp --no-save
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
             async function processImages() {
-              const reportFile = "'"$REPORT_FILE"'";
+              const logFile = "'$FINAL_LOG'";
               const listFile = "unzip_list.txt";
-              fs.writeFileSync(reportFile, "📸 **Инспекция фото:**\n");
+              
+              fs.appendFileSync(logFile, "📸 **Проверка фото:**\n");
+              
               if (!fs.existsSync(listFile)) {
-                fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
+                fs.appendFileSync(logFile, "Новых изображений в архиве нет.\n\n");
                 return;
               }
+              
               const content = fs.readFileSync(listFile, "utf8");
               const allFiles = content.split("\n").map(f => f.trim()).filter(f => f && (f.endsWith(".jpg") || f.endsWith(".jpeg")) && fs.existsSync(f));
+              
               if (allFiles.length === 0) {
-                fs.appendFileSync(reportFile, "Новых изображений в архиве нет.\n");
+                fs.appendFileSync(logFile, "Новых изображений в архиве нет.\n\n");
                 if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
                 return;
               }
+              
               for (const file of allFiles) {
                 try {
                   const stat = fs.statSync(file);
                   let origSizeKB = Math.round(stat.size / 1024);
                   let origSizeStr = origSizeKB >= 1024 ? (origSizeKB / 1024).toFixed(1) + " MB" : origSizeKB + " KB";
+                  
                   const image = sharp(file);
                   const meta = await image.metadata();
+                  
                   if (meta.width <= 1200) {
-                    fs.appendFileSync(reportFile, `\`${file}\` — ok\n`);
+                    fs.appendFileSync(logFile, `\`${file}\` — ${origSizeStr} — ОК\n`);
                   } else {
                     const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
                     fs.writeFileSync(file, buffer);
+                    
                     let newSizeKB = Math.round(buffer.length / 1024);
                     let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
-                    fs.appendFileSync(reportFile, `\`${file}\` — ${origSizeStr} — ${newSizeStr} — опт.\n`);
+                    fs.appendFileSync(logFile, `\`${file}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
                   }
                 } catch (err) {
-                  fs.appendFileSync(reportFile, `\`${file}\` — ошибка анализа\n`);
+                  fs.appendFileSync(logFile, `\`${file}\` — ошибка анализа\n`);
                 }
               }
+              fs.appendFileSync(logFile, "\n");
               if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
             }
             processImages();
             '
             
-            # Собираем отчет для обычного обновления
-            echo "⏱️ *$CURRENT_TIME*" > final_tg_msg.txt
-            echo "" >> final_tg_msg.txt
-            if [ -s "$DELETE_REPORT" ]; then cat $DELETE_REPORT >> final_tg_msg.txt; fi
-            cat $REPORT_FILE >> final_tg_msg.txt
+            if [ "$BACKUP_CREATED" = "true" ]; then
+              echo "💾 **Бэкап создан.**" >> $FINAL_LOG
+              echo "" >> $FINAL_LOG
+            fi
             
-            {
-              echo 'IMAGE_REPORT<<EOF'
-              cat final_tg_msg.txt
-              echo 'EOF'
-              echo 'IS_ROLLBACK=false'
-            } >> $GITHUB_ENV
-            
-            rm -f $REPORT_FILE $DELETE_REPORT final_tg_msg.txt
+            echo "IS_ROLLBACK=false" >> $GITHUB_ENV
           fi
+          
+          # Сохраняем промежуточный текст отчета во временную переменную окружения
+          {
+            echo 'TG_REPORT_BODY<<EOF'
+            cat $FINAL_LOG
+            echo 'EOF'
+          } >> $GITHUB_ENV
+          rm -f $FINAL_LOG
 
-      # Отправляем красивый отчет в Telegram (работает и для обычного апдейта, и для отката)
-      - name: Send Report Telegram Message
-        if: success() && env.IMAGE_REPORT != ''
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: |
-            ${{ env.IMAGE_REPORT }}
-
-      # Тестируем сборку Astro ТОЛЬКО если это было обновление. При откате этот шаг пропускается!
+      # Тестируем сборку Astro (Только для обновлений)
       - name: Install dependencies & Test Astro Build
         if: success() && env.IS_ROLLBACK == 'false'
+        id: astro_build
         run: |
           npm install
           npm run build
 
-      # Сохраняем изменения в репозитории
+      # Формирование финального статуса при успехе
+      - name: Compile Success Report
+        if: success()
+        run: |
+          echo "IMAGE_REPORT<<EOF" > report_env.txt
+          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
+          if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
+            echo "🟢 **Обновление успешно (Astro Build развернут)**" >> report_env.txt
+          fi
+          echo "EOF" >> report_env.txt
+          cat report_env.txt >> $GITHUB_ENV
+          rm report_env.txt
+
+      # Формирование финального статуса при ошибке
+      - name: Compile Failure Report
+        if: failure()
+        run: |
+          echo "IMAGE_REPORT<<EOF" > report_env.txt
+          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
+          if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
+            echo "🔴 **Ошибка обновления (Astro Build упал)**" >> report_env.txt
+          else
+            echo "🔴 **Ошибка при выполнении операции отката**" >> report_env.txt
+          fi
+          echo "EOF" >> report_env.txt
+          cat report_env.txt >> $GITHUB_ENV
+          rm report_env.txt
+
+      # Сохраняем изменения в гит (если всё прошло успешно)
       - name: Commit and Push changes
         if: success()
         run: |
@@ -221,37 +241,20 @@ jobs:
             echo "Изменений нет."
           else
             if [ "${{ env.IS_ROLLBACK }}" = "true" ]; then
-              git commit -m "🚨 Авто-откат: репозиторий успешно очищен от файлов неудачного обновления"
+              git commit -m "🚨 Авто-откат: репозиторий успешно очищен от файлов"
             else
               git commit -m "🤖 Авто-обновление сайта и создание точки отката"
             fi
             git push origin ${{ github.ref_name }}
           fi
 
-      - name: Get Final Timestamp
-        if: always()
-        run: |
-          export TZ="Europe/Bratislava"
-          echo "FINAL_TIME=$(date +"%H:%M:%S")" >> $GITHUB_ENV
-
-      - name: Send Success Status Telegram Message
-        if: success()
+      # Единая отправка итогового сообщения в Telegram
+      - name: Send Final Telegram Notification
+        if: always() && env.IMAGE_REPORT != ''
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            ⏱️ *${{ env.FINAL_TIME }}*
-            🟢 Операция успешно завершена!
-
-      - name: Send Failure Telegram Message
-        if: failure()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: |
-            ⏱️ *${{ env.FINAL_TIME }}*
-            🔴 Произошла ошибка при обработке действий.
+            ${{ env.IMAGE_REPORT }}
