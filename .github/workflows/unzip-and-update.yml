@@ -27,17 +27,20 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Process Update or Rollback
-        id: process_step
+      - name: Stage 1: Process Files & Images
+        id: stage_one
         env:
           ENV_REPO_NAME: ${{ github.event.repository.name }}
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
           
-          FINAL_LOG="tg_final_report.txt"
-          echo "📦 **Репозиторий:** \`$ENV_REPO_NAME\`" > $FINAL_LOG
-          echo "⏱️ **Время:** *$CURRENT_TIME*" >> $FINAL_LOG
+          # Передаем время во внешнее окружение для второго сообщения
+          echo "START_TIME=$CURRENT_TIME" >> $GITHUB_ENV
+          
+          FIRST_LOG="tg_stage1_report.txt"
+          echo "📦 **Репозиторий:** \`$ENV_REPO_NAME\`" > $FIRST_LOG
+          echo "⏱️ **Время:** *$CURRENT_TIME*" >> $FIRST_LOG
           
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
           if [ ! -f "$ZIP_FILE" ]; then
@@ -48,64 +51,64 @@ jobs:
           ZIP_NAME=$(basename "$ZIP_FILE")
           
           # =========================================================================
-          # СЦЕНАРИЙ 3: БЫЛ ЗАПУЩЕН ОТКАТ ИЗМЕНЕНИЙ (backup-rollback.zip)
+          # ВЕТКА ОТКАТА (backup-rollback.zip)
           # =========================================================================
           if [ "$ZIP_NAME" = "backup-rollback.zip" ]; then
-            echo "⚡ **Что делали:** Откат по бэкапу" >> $FINAL_LOG
-            echo "" >> $FINAL_LOG
+            echo "⚡ **Откат по бэкапу**" >> $FIRST_LOG
+            echo "" >> $FIRST_LOG
             
             mkdir ./temp_rollback
             unzip -o "$ZIP_FILE" -d ./temp_rollback
             
             if [ -f "./temp_rollback/delete.txt" ]; then
-              echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
+              echo "🗑️ **Удалены файлы:**" >> $FIRST_LOG
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
                 if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
                   rm "$clean_path"
-                  echo "\`$clean_path\`" >> $FINAL_LOG
+                  echo "\`$clean_path\`" >> $FIRST_LOG
                 fi
               done < ./temp_rollback/delete.txt
-              echo "" >> $FINAL_LOG
+              echo "" >> $FIRST_LOG
             fi
             
             rm -rf ./temp_rollback "$ZIP_FILE"
             echo "IS_ROLLBACK=true" >> $GITHUB_ENV
             
           # =========================================================================
-          # СЦЕНАРИИ 1 и 2: ОБЫЧНОЕ ОБНОВЛЕНИЕ
+          # ВЕТКА ОБЫЧНОГО ОБНОВЛЕНИЯ
           # =========================================================================
           else
-            echo "⚡ **Что делали:** Обновление проекта и проверка фото" >> $FINAL_LOG
-            echo "" >> $FINAL_LOG
+            echo "⚡ **Обновление проекта и проверка фото**" >> $FIRST_LOG
+            echo "" >> $FIRST_LOG
             
-            # Твой оригинальный рабочий способ получения списка имен файлов
+            # ТВОЯ СТАРАЯ ТЕХНОЛОГИЯ: Чтение имен файлов строго ИЗ АРХИВА до распаковки
             unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg)$" | tr -d '\r' > unzip_list.txt || true
             
             mkdir ./temp_unzip
             unzip -o "$ZIP_FILE" -d ./temp_unzip
             
-            # Удаление файлов по запросу ИИ
+            # Удаление файлов, если ИИ попросил удалить
             if [ -f "./temp_unzip/delete.txt" ]; then
-              echo "🗑️ **Удалены файлы:**" >> $FINAL_LOG
+              echo "🗑️ **Удалены файлы:**" >> $FIRST_LOG
               while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
                 clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
                 if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
                   rm "$clean_path"
-                  echo "\`$clean_path\`" >> $FINAL_LOG
+                  echo "\`$clean_path\`" >> $FIRST_LOG
                 fi
               done < ./temp_unzip/delete.txt
               rm ./temp_unzip/delete.txt
-              echo "" >> $FINAL_LOG
+              echo "" >> $FIRST_LOG
             fi
             
-            # Накатываем новые файлы
+            # Накатываем новые файлы на свои места
             if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
               cp -rf ./temp_unzip/* ./
             fi
             rm -rf ./temp_unzip
             
-            # Создаем бэкап-противоядие
+            # Создаем автоматический бэкап обратного действия
             ALL_ARCHIVE_FILES=$(unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -v -E "(^$|^\.|.*/$)" | tr -d '\r' || true)
             BACKUP_DIR="./ai-updates/backups"
             mkdir -p "$BACKUP_DIR"
@@ -129,13 +132,13 @@ jobs:
             # Ставим sharp
             npm install sharp --no-save
             
-            # Твой оригинальный рабочий Node.js блок с подстановкой лога через bash
+            # ТВОЙ СТАРЫЙ РАБОЧИЙ NODE БЛОК: Сканирует unzip_list.txt и выводит полные пути
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
             
             async function processImages() {
-              const logFile = "tg_final_report.txt";
+              const logFile = "tg_stage1_report.txt";
               const listFile = "unzip_list.txt";
               
               fs.appendFileSync(logFile, "📸 **Проверка фото:**\n");
@@ -187,62 +190,65 @@ jobs:
             '
             
             if [ "$BACKUP_CREATED" = "true" ]; then
-              echo "💾 **Бэкап создан.**" >> $FINAL_LOG
-              echo "" >> $FINAL_LOG
+              echo "💾 **Бэкап создан.**" >> $FIRST_LOG
+              echo "" >> $FIRST_LOG
             fi
             
             echo "IS_ROLLBACK=false" >> $GITHUB_ENV
           fi
           
-          # Переносим накопленный лог в окружение Гитхаба
+          # Экспортируем лог первого этапа в Гитхаб
           {
-            echo 'TG_REPORT_BODY<<EOF'
-            cat $FINAL_LOG
+            echo 'STAGE1_REPORT<<EOF'
+            cat $FIRST_LOG
             echo 'EOF'
           } >> $GITHUB_ENV
-          rm -f $FINAL_LOG
+          rm -f $FIRST_LOG
 
-      # Тестируем сборку Astro (Только для обычных обновлений)
+      # СРАЗУ отправляем отчет первого этапа (инспекция файлов и фото)
+      - name: Send Stage 1 Telegram Notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            ${{ env.STAGE1_REPORT }}
+
+      # Тестируем сборку Astro (Только если это обычное обновление, а не откат)
       - name: Install dependencies & Test Astro Build
         if: success() && env.IS_ROLLBACK == 'false'
-        id: astro_build
         run: |
           npm install
           npm run build
 
-      # Формирование финального статуса при полном успехе шагов
-      - name: Compile Success Report
+      # Второе сообщение: если всё собралось успешно
+      - name: Send Success Status Notification
         if: success()
-        run: |
-          echo "IMAGE_REPORT<<EOF" > report_env.txt
-          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
-          
-          if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
-            echo "🟢 **Обновление успешно (Astro Build развернут)**" >> report_env.txt
-          else
-            echo "🟢 **Откат успешно выполнен.**" >> report_env.txt
-          fi
-          echo "EOF" >> report_env.txt
-          cat report_env.txt >> $GITHUB_ENV
-          rm report_env.txt
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            📦 **Репозиторий:** `${{ github.event.repository.name }}`
+            ⏱️ **Время:** *${{ env.START_TIME }}*
+            ${{ env.IS_ROLLBACK == 'false' && '🟢 **Обновление успешно (Astro Build развернут)**' || '🟢 **Откат успешно выполнен.**' }}
 
-      # Формирование финального статуса при ошибке на каком-то этапе
-      - name: Compile Failure Report
+      # Второе сообщение: если на этапе билда или отката произошла ошибка
+      - name: Send Failure Status Notification
         if: failure()
-        run: |
-          echo "IMAGE_REPORT<<EOF" > report_env.txt
-          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
-          
-          if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
-            echo "🔴 **Ошибка обновления (Astro Build упал)**" >> report_env.txt
-          else
-            echo "🔴 **Ошибка при выполнении операции отката**" >> report_env.txt
-          fi
-          echo "EOF" >> report_env.txt
-          cat report_env.txt >> $GITHUB_ENV
-          rm report_env.txt
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            📦 **Репозиторий:** `${{ github.event.repository.name }}`
+            ⏱️ **Время:** *${{ env.START_TIME }}*
+            ${{ env.IS_ROLLBACK == 'false' && '🔴 **Ошибка обновления (Astro Build упал)**' || '🔴 **Ошибка при выполнении операции отката**' }}
 
-      # Сохраняем изменения в гит (если всё прошло успешно)
+      # Сохраняем изменения в репозиторий (при успехе)
       - name: Commit and Push changes
         if: success()
         run: |
@@ -257,14 +263,3 @@ jobs:
             fi
             git push origin ${{ github.ref_name }}
           fi
-
-      # Единая отправка итогового сообщения в Telegram
-      - name: Send Final Telegram Notification
-        if: always() && env.IMAGE_REPORT != ''
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: |
-            ${{ env.IMAGE_REPORT }}
