@@ -32,7 +32,9 @@ jobs:
         run: |
           export TZ="Europe/Bratislava"
           CURRENT_TIME=$(date +"%H:%M:%S")
-          REPO_NAME="${{ github.event.repository.name }}"
+          
+          # Железобетонный способ получить чистое имя репозитория
+          REPO_NAME=$(echo "$GITHUB_REPOSITORY" | awk -F '/' '{print $2}')
           
           # Файлы для накопления лога
           FINAL_LOG="tg_final_report.txt"
@@ -128,11 +130,15 @@ jobs:
             
             # Проверка и оптимизация фото через Sharp
             npm install sharp --no-save
+            
+            # Передаем путь лога через переменную среды для Node.js, чтобы не было конфликтов экранирования
+            export FINAL_LOG_PATH="$FINAL_LOG"
+            
             node -e '
             const fs = require("fs");
             const sharp = require("sharp");
             async function processImages() {
-              const logFile = "'$FINAL_LOG'";
+              const logFile = process.env.FINAL_LOG_PATH;
               const listFile = "unzip_list.txt";
               
               fs.appendFileSync(logFile, "📸 **Проверка фото:**\n");
@@ -151,27 +157,27 @@ jobs:
                 return;
               }
               
-              for (const file of allFiles) {
+              for (const filePath of allFiles) {
                 try {
-                  const stat = fs.statSync(file);
+                  const stat = fs.statSync(filePath);
                   let origSizeKB = Math.round(stat.size / 1024);
                   let origSizeStr = origSizeKB >= 1024 ? (origSizeKB / 1024).toFixed(1) + " MB" : origSizeKB + " KB";
                   
-                  const image = sharp(file);
+                  const image = sharp(filePath);
                   const meta = await image.metadata();
                   
                   if (meta.width <= 1200) {
-                    fs.appendFileSync(logFile, `\`${file}\` — ${origSizeStr} — ОК\n`);
+                    fs.appendFileSync(logFile, `\`${filePath}\` — ${origSizeStr} — ОК\n`);
                   } else {
                     const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
-                    fs.writeFileSync(file, buffer);
+                    fs.writeFileSync(filePath, buffer);
                     
                     let newSizeKB = Math.round(buffer.length / 1024);
                     let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
-                    fs.appendFileSync(logFile, `\`${file}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
+                    fs.appendFileSync(logFile, `\`${filePath}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
                   }
                 } catch (err) {
-                  fs.appendFileSync(logFile, `\`${file}\` — ошибка анализа\n`);
+                  fs.appendFileSync(logFile, `\`${filePath}\` — ошибка анализа\n`);
                 }
               }
               fs.appendFileSync(logFile, "\n");
@@ -188,7 +194,7 @@ jobs:
             echo "IS_ROLLBACK=false" >> $GITHUB_ENV
           fi
           
-          # Сохраняем промежуточный текст отчета во временную переменную окружения
+          # Сохраняем итоговый текст отчета в переменную окружения
           {
             echo 'TG_REPORT_BODY<<EOF'
             cat $FINAL_LOG
