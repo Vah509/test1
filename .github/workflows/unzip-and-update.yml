@@ -76,7 +76,7 @@ jobs:
           # СЦЕНАРИИ 1 и 2: ОБЫЧНОЕ ОБНОВЛЕНИЕ
           # =========================================================================
           else
-            echo "⚡ **What_We_Did:** Обновление проекта и проверка фото" >> $FINAL_LOG
+            echo "⚡ **Что делали:** Обновление проекта и проверка фото" >> $FINAL_LOG
             echo "" >> $FINAL_LOG
             
             mkdir ./temp_unzip
@@ -193,7 +193,7 @@ jobs:
           } >> $GITHUB_ENV
           rm -f $FINAL_LOG
 
-      # Тестируем сборку Astro (Только для обычных обновлений, Сценарий 3 пропускает этот шаг)
+      # Тестируем сборку Astro (Только для обычных обновлений)
       - name: Install dependencies & Test Astro Build
         if: success() && env.IS_ROLLBACK == 'false'
         id: astro_build
@@ -206,14 +206,11 @@ jobs:
         if: success()
         run: |
           echo "IMAGE_REPORT<<EOF" > report_env.txt
-          # Заменяем технический заголовок на красивый русский вариант
-          echo "${{ env.TG_REPORT_BODY }}" | sed 's/⚡ \*\*What_We_Did\*\*:/⚡ **Что делали**:/' >> report_env.txt
+          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
           
           if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
-            # Сценарий 1
             echo "🟢 **Обновление успешно (Astro Build развернут)**" >> report_env.txt
           else
-            # Сценарий 3 (Успешный откат)
             echo "🟢 **Откат успешно выполнен.**" >> report_env.txt
           fi
           echo "EOF" >> report_env.txt
@@ -225,14 +222,12 @@ jobs:
         if: failure()
         run: |
           echo "IMAGE_REPORT<<EOF" > report_env.txt
-          echo "${{ env.TG_REPORT_BODY }}" | sed 's/⚡ \*\*What_We_Did\*\*:/⚡ **Что делали**:/' >> report_env.txt
+          echo "${{ env.TG_REPORT_BODY }}" >> report_env.txt
           
           if [ "${{ env.IS_ROLLBACK }}" = "false" ]; then
-            # Сценарий 2 (Упала сборка Astro)
             echo "🔴 **Ошибка обновления (Astro Build упал)**" >> report_env.txt
           else
-            # Исключительный сбой при откате
-            echo "🔴 **🔴 Ошибка при выполнении операции отката**" >> report_env.txt
+            echo "🔴 **Ошибка при выполнении операции отката**" >> report_env.txt
           fi
           echo "EOF" >> report_env.txt
           cat report_env.txt >> $GITHUB_ENV
