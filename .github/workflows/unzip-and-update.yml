@@ -36,109 +36,107 @@ jobs:
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           
           ZIP_FILE=$(ls ai-updates/*.zip | head -n 1)
-          if [ -f "$ZIP_FILE" ]; then
-            
-            # 1. Получаем список картинок из архива
-            unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg|png)$" | tr -d '\r' > unzip_list.txt || true
-            
-            # 2. Распаковываем во временную папку
-            mkdir ./temp_unzip
-            unzip -o "$ZIP_FILE" -d ./temp_unzip
-            
-            # 3. Удаление файлов по списку delete.txt
-            if [ -f "./temp_unzip/delete.txt" ]; then
-              while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
-                clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
-                if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
-                  rm "$clean_path"
-                fi
-              done < ./temp_unzip/delete.txt
-              rm ./temp_unzip/delete.txt
-            fi
-            
-            # 4. Переносим файлы на место и чистим входящий архив
-            cp -rf ./temp_unzip/* ./
-            rm -rf ./temp_unzip
-            rm "$ZIP_FILE"
-            
-            # 5. Ставим sharp
-            npm install sharp --no-save
-            
-            # 6. Запускаем Node.js скрипт
-            node -e '
-            const fs = require("fs");
-            const sharp = require("sharp");
-            
-            async function processImages() {
-              const reportFile = "tg_image_report.txt";
-              const listFile = "unzip_list.txt";
-              
-              if (!fs.existsSync(listFile)) {
-                return; // Если файла списка нет, ничего не пишем (сообщение не создается)
-              }
-              
-              const content = fs.readFileSync(listFile, "utf8");
-              const allFiles = content.split("\n")
-                .map(f => f.trim())
-                .filter(f => f && (f.endsWith(".jpg") || f.endsWith(".jpeg") || f.endsWith(".png")) && fs.existsSync(f));
-              
-              if (allFiles.length === 0) {
-                if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
-                return; // Если картинок нет (например, это откат), выходим, не создавая пустой отчет
-              }
-              
-              // Создаем заголовок только если картинки реально есть
-              fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n\n`);
-              
-              for (const file of allFiles) {
-                try {
-                  const stat = fs.statSync(file);
-                  let origSizeKB = Math.round(stat.size / 1024);
-                  let origSizeStr = origSizeKB >= 1024 ? (origSizeKB / 1024).toFixed(1) + " MB" : origSizeKB + " KB";
-                  
-                  const image = sharp(file);
-                  const meta = await image.metadata();
-                  
-                  if (meta.width <= 1200) {
-                    fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} — ОК\n`);
-                  } else {
-                    const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
-                    fs.writeFileSync(file, buffer);
-                    
-                    let newSizeKB = Math.round(buffer.length / 1024);
-                    let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
-                    
-                    fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
-                  }
-                } catch (err) {
-                  fs.appendFileSync(reportFile, `• \`${file}\` — ошибка анализа\n`);
-                }
-              }
-              
-              if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
-            }
-            processImages().catch(err => {
-              fs.appendFileSync("tg_image_report.txt", "🔴 Ошибка скрипта обработки фото\n");
-              process.exit(1);
-            });
-            '
-            
-            # Экспортируем переменную только если файл отчета был создан и он не пустой
-            if [ -s tg_image_report.txt ]; then
-              {
-                echo 'IMAGE_REPORT<<EOF'
-                cat tg_image_report.txt
-                echo 'EOF'
-              } >> $GITHUB_ENV
-            fi
-            rm -f tg_image_report.txt
-            
-          else
-            echo "Архив не найден."
-            exit 1
+          
+          # ЗАЩИТА №2: Если экшен сработал на УДАЛЕНИЕ архива, просто выходим без ошибки
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "🟢 Архив удален вручную. Скрипту нечего обрабатывать. Завершаем успешно."
+            exit 0
           fi
+          
+          # 1. Получаем список картинок из архива
+          unzip -l "$ZIP_FILE" | awk '{print $4}' | grep -E "\.(jpg|jpeg|png)$" | tr -d '\r' > unzip_list.txt || true
+          
+          # 2. Распаковываем во временную папку
+          mkdir ./temp_unzip
+          unzip -o "$ZIP_FILE" -d ./temp_unzip
+          
+          # 3. Удаление файлов по списку delete.txt
+          if [ -f "./temp_unzip/delete.txt" ]; then
+            while IFS= read -r file_to_delete || [ -n "$file_to_delete" ]; do
+              clean_path=$(echo "$file_to_delete" | tr -d '\r' | xargs)
+              if [ -n "$clean_path" ] && [ -f "$clean_path" ]; then
+                rm "$clean_path"
+              fi
+            done < ./temp_unzip/delete.txt
+            rm ./temp_unzip/delete.txt
+          fi
+          
+          # ЗАЩИТА №1: Переносим файлы ТОЛЬКО если папкаtemp_unzip не пустая
+          if [ "$(ls -A ./temp_unzip 2>/dev/null)" ]; then
+            cp -rf ./temp_unzip/* ./
+          fi
+          rm -rf ./temp_unzip
+          rm "$ZIP_FILE"
+          
+          # 5. Ставим sharp
+          npm install sharp --no-save
+          
+          # 6. Запускаем Node.js скрипт
+          node -e '
+          const fs = require("fs");
+          const sharp = require("sharp");
+          
+          async function processImages() {
+            const reportFile = "tg_image_report.txt";
+            const listFile = "unzip_list.txt";
+            
+            if (!fs.existsSync(listFile)) return;
+            
+            const content = fs.readFileSync(listFile, "utf8");
+            const allFiles = content.split("\n")
+              .map(f => f.trim())
+              .filter(f => f && (f.endsWith(".jpg") || f.endsWith(".jpeg") || f.endsWith(".png")) && fs.existsSync(f));
+            
+            if (allFiles.length === 0) {
+              if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
+              return;
+            }
+            
+            fs.writeFileSync(reportFile, `📦 **Репозиторий:** \`'${REPO_NAME}'\`\n⏱ *'${CURRENT_TIME}'*\n📸 *Инспекция фото:*\n\n`);
+            
+            for (const file of allFiles) {
+              try {
+                const stat = fs.statSync(file);
+                let origSizeKB = Math.round(stat.size / 1024);
+                let origSizeStr = origSizeKB >= 1024 ? (origSizeKB / 1024).toFixed(1) + " MB" : origSizeKB + " KB";
+                
+                const image = sharp(file);
+                const meta = await image.metadata();
+                
+                if (meta.width <= 1200) {
+                  fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} — ОК\n`);
+                } else {
+                  const buffer = await image.resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+                  fs.writeFileSync(file, buffer);
+                  
+                  let newSizeKB = Math.round(buffer.length / 1024);
+                  let newSizeStr = newSizeKB >= 1024 ? (newSizeKB / 1024).toFixed(1) + " MB" : newSizeKB + " KB";
+                  
+                  fs.appendFileSync(reportFile, `• \`${file}\` — ${origSizeStr} -> ${newSizeStr} — ОПТ\n`);
+                }
+              } catch (err) {
+                fs.appendFileSync(reportFile, `• \`${file}\` — ошибка анализа\n`);
+              }
+            }
+            
+            if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
+          }
+          processImages().catch(err => {
+            fs.appendFileSync("tg_image_report.txt", "🔴 Ошибка скрипта обработки фото\n");
+            process.exit(1);
+          });
+          '
+          
+          if [ -s tg_image_report.txt ]; then
+            {
+              echo 'IMAGE_REPORT<<EOF'
+              cat tg_image_report.txt
+              echo 'EOF'
+            } >> $GITHUB_ENV
+          fi
+          rm -f tg_image_report.txt
 
-      # Отправка инспекции фото — ТЕПЕРЬ СТРОГО ЕСЛИ ТЕКСТ ЕСТЬ (Защита от пустых сообщений)
+      # Отправка инспекции фото — строго если текст есть
       - name: Send Image Inspection Report
         if: always() && env.IMAGE_REPORT != ''
         uses: appleboy/telegram-action@master
