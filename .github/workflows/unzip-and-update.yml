@@ -1,0 +1,61 @@
+name: Ultimate AI Update Manager (Astro + TG)
+
+on:
+  push:
+    paths:
+      - 'ai-updates/**.zip'
+
+jobs:
+  unzip-and-validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm install
+
+      # Головний сценарій: рахує дати оновлення сторінок (по реальній
+      # git-історії, ДО будь-яких змін) → фото → staging → тестова
+      # збірка → (при успіху) запис карти дат + перенесення у реальний
+      # репозиторій → два повідомлення в Telegram → видалення ZIP
+      # (гарантовано, навіть якщо якийсь крок впаде — див. try/finally
+      # усередині process-update.js).
+      # Детальний опис кроків — усередині scripts/process-update.js.
+      - name: Process update (dates, photos, staging build, promote)
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
+        run: node scripts/process-update.js
+
+      # Комітимо та пушимо ЛИШЕ якщо process-update.js завершився
+      # успішно. Якщо він впав (білд не пройшов або сталася помилка) —
+      # реальний репозиторій і так лишився недоторканим, коміт не
+      # потрібен. src/data/lastmod-map.json уже оновлений і лежить
+      # у робочій копії разом з рештою файлів архіву — коміт один,
+      # окремого кроку для карти дат більше немає.
+      - name: Commit and Push changes
+        if: success()
+        run: |
+          git add .
+          if git diff --staged --quiet; then
+            echo "Изменений нет."
+          else
+            git commit -m "🤖 Авто-обновление сайта"
+            git push origin ${{ github.ref_name }}
+          fi
