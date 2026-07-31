@@ -1,0 +1,101 @@
+name: Ultimate AI Update Manager (Astro + TG)
+
+on:
+  push:
+    paths:
+      - 'ai-updates/**.zip'
+
+jobs:
+  unzip-and-validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ВАЖЛИВО: цей крок — причина, чому workflow НЕ зациклюється сам
+      # на себе. Крок "Commit and Push changes" нижче сам комітить
+      # видалення ZIP з ai-updates/ — а це теж зміна шляху
+      # "ai-updates/**.zip", яка знову підпадає під тригер on.push.paths
+      # вище. GitHub Actions запустив би job ВДРУГЕ на власний коміт
+      # бота. Замість того щоб розпізнавати "чи це коміт бота" (не
+      # завжди надійно — залежить від того, як саме налаштований
+      # git user), перевіряємо напряму факт: чи Є в ai-updates/ хоч
+      # один .zip файл ПРЯМО ЗАРАЗ, одразу після checkout. Якщо
+      # немає — усі наступні кроки пропускаються (`if: steps.check-zip
+      # .outputs.found == 'true'`), job завершується швидко й без
+      # зайвих дій.
+      - name: Check for ZIP archive
+        id: check-zip
+        run: |
+          if ls ai-updates/*.zip >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "Архів не знайдено в ai-updates/ — job завершується без дій."
+          fi
+
+      - name: Setup NodeJS
+        if: steps.check-zip.outputs.found == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Git user
+        if: steps.check-zip.outputs.found == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        if: steps.check-zip.outputs.found == 'true'
+        run: npm install
+
+      # Головний сценарій: рахує дати оновлення сторінок (по реальній
+      # git-історії, ДО будь-яких змін) → фото → staging → тестова
+      # збірка → (при успіху) запис карти дат + перенесення у реальний
+      # репозиторій → два повідомлення в Telegram → видалення ZIP
+      # (гарантовано, навіть якщо якийсь крок впаде — див. try/finally
+      # усередині process-update.js).
+      # Детальний опис кроків — усередині scripts/process-update.js.
+      - name: Process update (dates, photos, staging build, promote)
+        if: steps.check-zip.outputs.found == 'true'
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
+        run: node scripts/process-update.js
+
+      # Комітимо та пушимо ЗАВЖДИ (always), незалежно від того, впав
+      # білд чи ні.
+      #
+      # ЧОМУ НЕ success(): process-update.js видаляє ZIP з ai-updates/
+      # локально, на диску runner'а, У БУДЬ-ЯКОМУ ВИПАДКУ (try/finally
+      # усередині скрипта). Але це видалення — лише зміна файлової
+      # системи тимчасової машини. Щоб воно потрапило в РЕАЛЬНИЙ
+      # репозиторій на GitHub, його треба закомітити і запушити.
+      # Якщо коміт відбувається лише при success() — то при провалі
+      # білду (process-update.js завершується з exit code 1, job
+      # вважається "не success") коміт просто НЕ ЗАПУСКАЄТЬСЯ, і ZIP
+      # на GitHub лишається лежати, ніби нічого не видалялось, хоча
+      # локально на runner'і його вже нема.
+      #
+      # При success() (білд пройшов) — тут же комітиться і промоут
+      # файлів проекту, і оновлений src/data/lastmod-map.json, і факт
+      # видалення ZIP — усе одним комітом.
+      # При провалі — комітиться ТІЛЬКИ видалення ZIP (файли проекту
+      # не мінялись, бо promoteToRepo не викликався при невдалому
+      # білді).
+      - name: Commit and Push changes
+        if: always()
+        run: |
+          git add .
+          if git diff --staged --quiet; then
+            echo "Изменений нет."
+          else
+            git commit -m "🤖 Авто-обновление сайта"
+            git push origin ${{ github.ref_name }}
+          fi
